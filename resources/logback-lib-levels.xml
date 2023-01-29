@@ -1,0 +1,20 @@
+<included
+        xmlns="http://ch.qos.logback/xml/ns/logback"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://ch.qos.logback/xml/ns/logback https://raw.githubusercontent.com/applift/logback-XSD/master/src/main/xsd/logback.xsd">
+    <logger name="org.apache" level="info"/>
+    <logger name="io.netty" level="warn"/>
+    <logger name="com.fasterxml.jackson.databind.introspect.POJOPropertyBuilder" level="info"/>
+    <logger name="io.lettuce.core.protocol" level="info"/>
+	<logger name="io.grpc.netty.NettyClientHandler" level="info"/>
+
+    <property name="level" value="${LOG_LEVEL:-info}"/>
+    <if condition='property("level").equalsIgnoreCase("debug")'>
+        <then>
+            <logger name="org.apache.cxf" level="info"/>
+        </then>
+        <else>
+            <logger name="org.apache.cxf" level="warn"/>
+        </else>
+    </if>
+</included>
