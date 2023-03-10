@@ -61,11 +61,18 @@ object Dependencies {
     }
 
     object Ktor {
-        private const val version = "2.2.2"
+        private const val version = "2.2.4"
         const val clientCore = "io.ktor:ktor-client-core:$version"
         const val clientCio = "io.ktor:ktor-client-cio:$version"
         const val clientContentNegitiation = "io.ktor:ktor-client-content-negotiation:$version"
         const val serializationJson = "io.ktor:ktor-serialization-kotlinx-json:$version"
+    }
+
+    object Graphql {
+        private const val version = "6.4.0"
+        const val client = "com.expediagroup:graphql-kotlin-ktor-client:$version"
+        const val jackson = "com.expediagroup:graphql-kotlin-client-jackson"
+        const val serialization = "com.expediagroup:graphql-kotlin-client-serialization:$version"
     }
 
 
@@ -81,4 +88,5 @@ sealed class Plugins(val pluginId: String, val version: String) {
     object DockerCompose: Plugins("com.avast.gradle.docker-compose", "0.14.2")
     object KtLint: Plugins("org.jlleitschuh.gradle.ktlint", "10.2.1")
     object KtLintIdea: Plugins("org.jlleitschuh.gradle.ktlint-idea", "10.2.1")
+    object GraphQL: Plugins("com.expediagroup.graphql", "6.4.0")
 }

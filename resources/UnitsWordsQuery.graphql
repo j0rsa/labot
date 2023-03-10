@@ -1,0 +1,21 @@
+query UnitsWordsQuery($unitId: ID!, $nativeCode: LanguageEnum!, $learningCode: LanguageEnum!) {
+	curriculum(native: $nativeCode, learning: $learningCode) {
+		unit(id: $unitId) {
+			cefrLevel
+			id
+			words {
+				word
+				recordings {
+					audioContentType
+					recordingUrl
+					speaker
+				}
+				translations
+				linkToItem
+				__typename
+			}
+			__typename
+		}
+		__typename
+	}
+}

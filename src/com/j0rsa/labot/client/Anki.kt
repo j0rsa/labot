@@ -27,6 +27,7 @@ class Anki(
     private val url: String
 ) {
     val log = loggerFor<Anki>()
+
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient(CIO) {
         install(HttpRequestRetry) {
@@ -53,11 +54,10 @@ class Anki(
         }
     }
 
-    private suspend fun sendAction(action: String, data: Note? = null) =
-        client.post(url) {
-            contentType(ContentType.Application.Json)
-            setBody(Action(action = action, params = data?.let { NoteWrapper(it) }))
-        }.body<AnkiResponse>()
+    private suspend fun sendAction(action: String, data: Note? = null) = client.post(url) {
+        contentType(ContentType.Application.Json)
+        setBody(Action(action = action, params = data?.let { NoteWrapper(it) }))
+    }.body<AnkiResponse>()
 
     suspend fun sync() = sendAction("sync")
 
@@ -65,30 +65,26 @@ class Anki(
 
     suspend fun addNotes(notes: Collection<Note>) = run {
         log.info("adding notes")
-        val chunks = notes.chunked(5)
+        val chunks = notes.chunked(10)
         val size = chunks.size
         chunks.withIndex().map { (i, v) ->
             client.post(url) {
                 contentType(ContentType.Application.Json)
                 setBody(Action(action = "addNotes", params = NoteWrapper(notes = v)))
             }.body<AnkiResponse>().also {
-                log.info("Finished chunk (${i+1}/$size)...")
+                log.info("Finished chunk (${i + 1}/$size)...")
             }
         }.also {
             log.info("Finished!")
-        }.mapNotNull { it.error }
-            .joinToString("\n")
-            .let {
-                AnkiResponse(error = it)
-            }
+        }.mapNotNull { it.error }.joinToString("\n").let {
+            AnkiResponse(error = it)
+        }
     }
 
     companion object {
         @Serializable
         data class Action(
-            val version: Int = 6,
-            val action: String,
-            val params: NoteWrapper? = null
+            val version: Int = 6, val action: String, val params: NoteWrapper? = null
         )
 
         @Serializable
@@ -134,9 +130,7 @@ class Anki(
 
         @Serializable
         data class Attachment(
-            val url: String = "",
-            val filename: String = "",
-            val fields: Collection<String> = listOf("Extra")
+            val url: String = "", val filename: String = "", val fields: Collection<String> = listOf("Extra")
         )
     }
 }

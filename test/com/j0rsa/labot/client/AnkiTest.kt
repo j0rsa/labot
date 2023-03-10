@@ -11,6 +11,5 @@ class AnkiTest : StringSpec({
     }
 
     "addNote" {
-
     }
 })

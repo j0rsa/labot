@@ -10,6 +10,7 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
+import java.time.ZonedDateTime
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -21,7 +22,6 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
-import java.time.ZonedDateTime
 
 class Skyeng(
     private val user: String,
@@ -48,18 +48,16 @@ class Skyeng(
     suspend fun getCsrf(): String {
         val responseText = client.get("$host/login").bodyAsText()
         val jsoup = Jsoup.parse(responseText)
-        return jsoup.select("input[name=csrfToken]")
-            .first()?.attr("value") ?: ""
+        return jsoup.select("input[name=csrfToken]").first()?.attr("value") ?: ""
     }
 
     suspend fun login(): String {
-        client.submitForm("$host/frame/login-submit",
-            Parameters.build {
-                append("username", user)
-                append("password", password)
-                append("redirect", "https://skyeng.ru/")
-                append("csrfToken", getCsrf())
-            }) {
+        client.submitForm("$host/frame/login-submit", Parameters.build {
+            append("username", user)
+            append("password", password)
+            append("redirect", "https://skyeng.ru/")
+            append("csrfToken", getCsrf())
+        }) {
             headers {
                 append("Content-Type", "application/x-www-form-urlencoded")
             }
@@ -124,21 +122,19 @@ class Skyeng(
         }
     }
 
-    suspend fun getMeaning(token: String, words: List<WordData>): List<Meaning> =
-        words.chunked(25).flatMap { chunk ->
-            val ids = chunk.joinToString(",") { it.meaningId.toString() }
-            client.get("$dictionaryHost/for-services/v2/meanings") {
-                parameter("ids", ids)
-                bearerAuth(token)
-            }.body<List<Meaning>>()
-        }
+    suspend fun getMeaning(token: String, words: List<WordData>): List<Meaning> = words.chunked(25).flatMap { chunk ->
+        val ids = chunk.joinToString(",") { it.meaningId.toString() }
+        client.get("$dictionaryHost/for-services/v2/meanings") {
+            parameter("ids", ids)
+            bearerAuth(token)
+        }.body<List<Meaning>>()
+    }
 
     companion object {
 
         @Serializable
         data class WordSet(
-            val meta: Meta,
-            val data: List<WordSetData>
+            val meta: Meta, val data: List<WordSetData>
         )
 
         @Serializable
@@ -171,8 +167,7 @@ class Skyeng(
         @Serializable
         data class WordData(
             val meaningId: Int,
-            @Serializable(with = ZonedDateTimeSerializer::class)
-            val createdAt: ZonedDateTime,
+            @Serializable(with = ZonedDateTimeSerializer::class) val createdAt: ZonedDateTime,
         )
 
         @OptIn(ExperimentalSerializationApi::class)
@@ -195,32 +190,23 @@ class Skyeng(
             val text: String,
             val transcription: String,
             val translation: Translation
-        ): CustomSoundAttachment {
+        ) : CustomSoundAttachment {
             fun pictureAttachment(scale: Int = 2, fields: Collection<String> = listOf("Extra")) = run {
                 val url = images.firstOrNull()?.url ?: return@run Anki.Companion.Attachment()
-                val dimensions = url
-                    .replaceBefore("/unsafe/", "")
-                    .replace("/unsafe/", "")
-                    .replaceAfter("/", "")
-                    .replace("/", "")
+                val dimensions =
+                    url.replaceBefore("/unsafe/", "").replace("/unsafe/", "").replaceAfter("/", "").replace("/", "")
                 val newDimensions = dimensions.split("x").map { it.toInt() * scale }.joinToString("x")
                 val filename = url.replaceBeforeLast("/", "").replace("/", "")
                 Anki.Companion.Attachment(
-                    url.replace(dimensions, newDimensions),
-                    filename,
-                    fields
+                    url.replace(dimensions, newDimensions), filename, fields
                 )
             }
 
             suspend fun toAnkiClozeNote(deckName: String, voice: Voice = Voice.Male2) = examples.map {
-                val cWrappedExample= it.text
-                    .replace("[", "{{c1::")
-                    .replace("]", "}}")
-                val clearExample= it.text
-                    .replace("[", "")
-                    .replace("]", "")
-                val wordSoundAttachment = customSoundAttachment(voice)
-                val sentenceSoundAttachment = it.customSoundAttachment(voice)
+                val cWrappedExample = (it.text ?: return@map null).replace("[", "{{c1::").replace("]", "}}")
+                val clearExample = it.text.replace("[", "").replace("]", "")
+                val wordSoundAttachment = customSoundAttachment(voice) ?: return@map null
+                val sentenceSoundAttachment = it.customSoundAttachment(voice) ?: return@map null
                 val pictureAttachment = pictureAttachment()
                 val maskedText = """
                     |$cWrappedExample<br/>
@@ -246,10 +232,7 @@ class Skyeng(
         }
 
         enum class Voice {
-            Male1,
-            Male2,
-            Female1,
-            Female2;
+            Male1, Male2, Female1, Female2;
 
             override fun toString(): String = "${this.name.lowercase().dropLast(1)}_${this.name.takeLast(1)}"
         }
@@ -267,9 +250,9 @@ class Skyeng(
 
         @Serializable
         data class MeaningDefinition(
-            val text: String,
-            override val soundUrl: String
-        ): CustomSoundAttachment
+            val text: String? = null,
+            override val soundUrl: String? = null,
+        ) : CustomSoundAttachment
 
         @Serializable
         data class MeaningImage(
@@ -277,12 +260,13 @@ class Skyeng(
         )
 
         interface CustomSoundAttachment {
-            val soundUrl: String
-            fun customSoundUrl(voice: Voice = Voice.Male2, language: Language = Language.EN): String =
-                URLBuilder(soundUrl).apply {
+            val soundUrl: String?
+            fun customSoundUrl(voice: Voice = Voice.Male2, language: Language = Language.EN): String? = soundUrl?.let {
+                URLBuilder(it).apply {
                     parameters["lang"] = language.name.lowercase()
                     parameters["voice"] = voice.toString()
                 }.buildString()
+            }
 
             fun customSoundAttachment(
                 voice: Voice = Voice.Male2,
@@ -290,21 +274,18 @@ class Skyeng(
                 fields: Collection<String> = listOf("Extra")
             ) = run {
                 val url = customSoundUrl(voice, language)
+                url ?: return@run null
                 val u = Url(url)
                 val filename = listOfNotNull(
                     u.parameters["lang"],
                     "_",
                     u.parameters["voice"],
                     "_",
-                    u.parameters["text"]
-                        ?.replace(" ", "_")
-                        ?.replace("[^A-Za-z0-9_]".toRegex(), ""),
+                    u.parameters["text"]?.replace(" ", "_")?.replace("[^A-Za-z0-9_]".toRegex(), ""),
                     ".mp3"
                 ).joinToString("")
                 Anki.Companion.Attachment(
-                    url,
-                    filename,
-                    fields
+                    url, filename, fields
                 )
             }
         }

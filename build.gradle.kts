@@ -1,3 +1,5 @@
+import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer
+import com.expediagroup.graphql.plugin.gradle.graphql
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -11,6 +13,7 @@ plugins {
         Plugins.DockerCompose,
         Plugins.KtLint,
         Plugins.KtLintIdea,
+        Plugins.GraphQL,
     ).forEach {
         id(it.pluginId) version it.version
     }
@@ -55,10 +58,25 @@ dependencies {
 
     implementation(Dependencies.Jsoup.lib)
 
+    implementation(Dependencies.Graphql.client) {
+        exclude(Dependencies.Graphql.jackson)
+    }
+    implementation(Dependencies.Graphql.serialization)
+
     testImplementation(Dependencies.KoTest.runner)
     testImplementation(Dependencies.KoTest.assertions)
     testImplementation(Dependencies.KoTest.property)
     testImplementation(Dependencies.Mockk.lib)
+}
+
+graphql {
+    client {
+        queryFileDirectory = "$projectDir/resources"
+        endpoint = "https://app.chatterbug.com/api/graphql"
+//        schemaFile = File("$projectDir/resources/schemas/chatterbug/schema.graphql")
+        packageName = "com.j0rsa.chatterbug.generated"
+        serializer = GraphQLSerializer.KOTLINX
+    }
 }
 
 tasks {
@@ -165,3 +183,9 @@ kotlin.sourceSets["main"].kotlin.srcDir("src")
 kotlin.sourceSets["test"].kotlin.srcDir("test")
 sourceSets["main"].resources.srcDir("resources")
 sourceSets["test"].resources.srcDir("testresources")
+
+ktlint {
+    filter {
+        exclude("**/generated/**")
+    }
+}

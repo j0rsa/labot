@@ -1,0 +1,3107 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Root
+}
+
+"Types that can have audio recordings attached"
+interface Listenable {
+    recordings: [Recording!]
+}
+
+"Types that require user input"
+interface Respondable {
+    responses(top: Int): [Response!]
+}
+
+"Types that can be studied through study cards"
+interface Studyable {
+    language: Language
+    level: Level
+    studyableId: ID
+    studyableType: StudyableEnum
+}
+
+"Types containing language that can be translated"
+interface Translatable {
+    translations: [Translation!]
+}
+
+"Types that can be linked to a Unit"
+interface Unitable {
+    language: Language
+    level: Level
+    unit: Lesson
+    unitableId: ID
+    unitableType: UnitableTypesEnum
+}
+
+interface VideoLearnable {
+    id: ID!
+    lesson: Lesson!
+    orderNumber: Int!
+    showType: String!
+}
+
+"Things that can be events"
+union ClubEventable = StudyGroup
+
+"Objects which are in the curriculum"
+union CurriculumItem = Cloze | MediaSource | Pattern | Phrase | Reading | Sequence | Topic | Word | WritingPrompt
+
+"Things that can be the focus of a StudyGroup"
+union GroupStudyable = Unit | Video
+
+"Things that showables can be shown on"
+union Presentable = ClubEvent | StudyGroup
+
+"Things that can be returned from a general search query"
+union Searchable = VideoResult
+
+"Things that can be the focus of a Short"
+union ShortStudyable = Video | VideoShowing
+
+"Things that can be shown during a stream or video"
+union Showable = QuizQuestion | VideoSlide
+
+type Activity {
+    "CEFR Level of the activity"
+    cefrLevel: String
+    coverImageUrl: String
+    "Duration of the activity"
+    duration: Int
+    format: ActivityFormat
+    heading: String
+    "An identifier which can be used to redirect to this activity"
+    identifier: String
+    language: Language
+    lastSeenAt: DateTime
+    lastSeenTimeAgo: String
+    level: Level
+    name: ActivityName
+    "The study cards for this activity"
+    studyCards: [StudyCard!]
+    "The unit this activity belongs to"
+    unit: Unit
+}
+
+"Banner message that can be broadcasted to a segment of our userbase"
+type Alert {
+    adminLabel: String
+    buttonLink: String
+    buttonName: String
+    filters: String
+    hideable: Boolean
+    id: ID
+    isActive: Boolean
+    lastActive: DateTime
+    message: String
+    messageType: String
+    translations(
+        "Language code (de, en, ...)"
+        code: [LanguageEnum!]
+    ): [Translation!]
+}
+
+type Answer {
+    answer: String
+}
+
+type Appointment {
+    averageStudentRating: Int
+    "Recording of live lesson"
+    chatSessionArchiveUrl: String
+    "This session ID can be used to join the live lesson once it's available"
+    chatSessionId: String
+    createdAt: DateTime
+    duration: Int
+    endTime: DateTime
+    endTimeAgo: String
+    exercises(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): ExerciseConnection
+    hasConfirmedStudent: Boolean
+    hasConfirmedTutor: Boolean
+    id: ID
+    "An identifier which can be used to redirect to this activity"
+    identifier: String
+    isTraining: Boolean
+    language: Language
+    lastSeenTimeAgo: String
+    "The all-time number of this live lesson for a student"
+    liveLessonNumber: Int
+    partner: Profile
+    "List of units in the order they will be covered during the Live Lesson"
+    plannedUnits: [Unit!]
+    plannerType: PlannerType
+    "A rating that points out whether the student would like to see this tutor again"
+    ratingAgainForTutor: BasicRating
+    startTime: DateTime
+    startTimeAgo: String
+    startsInSeconds: Int
+    status: AppointmentStatus
+    student: Profile
+    tutor: Profile
+    unit: Unit @deprecated(reason: "Deprecated in favor of plannedUnits since appointments can cover multiple units")
+    updatedAt: DateTime
+}
+
+"The connection type for Appointment."
+type AppointmentConnection {
+    "A list of edges."
+    edges: [AppointmentEdge]
+    "A list of nodes."
+    nodes: [Appointment]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type AppointmentEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: Appointment
+}
+
+type Aspect {
+    name: String
+    value: String
+}
+
+type Badge {
+    description: String
+    icon: String
+    image: String
+    name: String
+    "URL to this badge"
+    url: String
+}
+
+type Breadcrumb {
+    key: String
+    link: String
+    name: String
+}
+
+type CardActivity {
+    "CEFR Level to which this card study belongs"
+    cefrLevel: String
+    "Duration of the last card session"
+    duration: Int
+    "Date of the last card session"
+    endedAt: DateTime
+    lastSeenTimeAgo: String
+    "Start date of the last card session"
+    startedAt: DateTime
+    "Unit to which this card study belongs"
+    unitName: String
+}
+
+type CefrLevel {
+    "CEFR level as a parameter value (e.g. a1, b2)"
+    code: CefrLevelCode
+    "Description of what is accomplished over the course of this level"
+    description: String
+    id: ID
+    "A short, descriptive label of this CEFR level"
+    label: String
+    "Friendly text explaining what is expected at the midpoint of this level"
+    midpointDescription: String
+    "Friendly text explaining what is expected at the start of this level"
+    startingDescription: String
+}
+
+type Certification {
+    cefrLevel: CefrLevelCode
+    "The date when the certificate was obtained"
+    completedAt: DateTime
+    "The description of the achieved level, such as Advanced or Beginner"
+    description: String
+    kind: CertificationKind
+    licenseNumber: String
+    "Link leading to the certificate"
+    linkUrl: String
+    liveLessonsInMinutes: Int
+    "The progress - always 1.0 (100%)"
+    progress: Float
+    selfStudyInMinutes: Int
+    "The date when the student started studying this level"
+    startedAt: DateTime
+}
+
+"Feature label for learner-produced input"
+type Chattertag {
+    "Linguistic category for this chattertag."
+    category: String
+    id: ID
+    "Unique identifier of this chattertag."
+    tagType: String
+}
+
+type ClientVersion {
+    clientName: ClientNameEnum!
+    requiresUpgrade: Boolean!
+}
+
+"Studyable type for a phrase to be completed by the learner"
+type Cloze implements Respondable & Studyable & Unitable {
+    askNative: StudyCardSide
+    "Structured question string, containing one or more answer gaps."
+    cloze: String
+    "Explanation to the user if they provide an incorrect response."
+    explanation: String
+    language: Language
+    level: Level
+    responses(top: Int): [Response!]
+    studyableId: ID
+    studyableType: StudyableEnum
+    "Parent topic to which this cloze belongs."
+    topic: Topic
+    unit: Lesson
+    unitableId: ID
+    unitableType: UnitableTypesEnum
+}
+
+type ClubEvent {
+    "The users accepted to this event, in the order they booked it"
+    acceptedMembers: [ClubEventUser!]!
+    bookingAllowed: Boolean!
+    bookingAllowedReason: String!
+    cefrLevel: CefrLevelCode!
+    description: String
+    eventType: String!
+    "Details specific to the event type (a study group, etc.)"
+    eventable: ClubEventable
+    hasSeatsAvailable: Boolean!
+    id: ID!
+    maxMembers: Int
+    membership: ClubEventMembership
+    "Indicates if the event is not publicly available"
+    private: Boolean!
+    scheduledAt: DateTime!
+    seatsAvailable: Int
+    seatsTaken: Int!
+    showings: [GenericShowing!]
+    streamsLevel: StreamsLevel!
+    title: String!
+    waitingRoomOpensAt: DateTime!
+    "The users on the waitlist, in the order they booked it"
+    waitlistedMembers: [ClubEventUser!]!
+}
+
+"Autogenerated return type of ClubEventAboutToStart"
+type ClubEventAboutToStartPayload {
+    clubEvent: ClubEvent!
+}
+
+"The connection type for ClubEvent."
+type ClubEventConnection {
+    "A list of edges."
+    edges: [ClubEventEdge]
+    "A list of nodes."
+    nodes: [ClubEvent]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type ClubEventEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: ClubEvent
+}
+
+"Autogenerated return type of ClubEventEnded"
+type ClubEventEndedPayload {
+    clubEvent: ClubEvent!
+}
+
+type ClubEventGroup {
+    "The identifier of the club event group"
+    kind: String!
+    "The translated label of the club event group"
+    label: String!
+}
+
+"Autogenerated return type of ClubEventJoinersChanged"
+type ClubEventJoinersChangedPayload {
+    clubEvent: ClubEvent!
+}
+
+"Autogenerated return type of ClubEventMembersChanged"
+type ClubEventMembersChangedPayload {
+    clubEvent: ClubEvent!
+}
+
+type ClubEventMembership {
+    bookedAt: DateTime!
+    status: ClubEventMembershipStatus!
+}
+
+"Autogenerated return type of ClubEventStarted"
+type ClubEventStartedPayload {
+    clubEvent: ClubEvent!
+}
+
+type ClubEventUser {
+    id: ID!
+    joined: Boolean!
+    status: ClubEventMembershipStatus!
+    user: PublicUser!
+}
+
+type Community {
+    "This user's introduction"
+    aboutMe: Discussion
+    "Badges for this user"
+    badges: [Badge!]
+    "Recent discussions for this user"
+    recentDiscussions: [Discussion!]
+}
+
+"Studyable type for a collection of one or more clozes."
+type Concept implements Studyable {
+    "Cloze (gap-fill) exercises to test this topic"
+    clozes: [Cloze!]
+    "HTML for examples section (i.e. classic topic intro bottom)"
+    examples: String
+    "Markdown for examples section (i.e. classic topic intro bottom)"
+    examplesMarkdown: String
+    "HTML for topic explanation in student's native language"
+    explanation: String
+    "JSON for topic explanation in student's native language"
+    explanationJson: String
+    "Optional instructions to display when each cloze is tested"
+    instructions: String
+    "When and how to show the introduction or topic explanation"
+    introWith: TopicIntroWithEnum
+    "HTML for classic topic intro top"
+    introduction: String
+    "Markdown for classic topic intro top"
+    introductionMarkdown: String
+    isLive: Boolean
+    language: Language
+    "Order within the topics for this level (lowest values come first)."
+    learningOrder: Int
+    "For which unit is this topic introduced"
+    lesson: Lesson
+    level: Level
+    linkToItem: String
+    "Title of this topic"
+    name: String
+    studyableId: ID
+    studyableType: StudyableEnum
+    "How should the clozes be given to the student"
+    teachWith: TopicTeachWithEnum
+    timesSeen: Int!
+}
+
+type ContentBlock {
+    "The content to show in the block."
+    blockHtml: String
+    "The css styles for the block content."
+    blockStyles: String
+    "The type of block to insert."
+    blockType: Block
+    "DOM ID of the block to insert"
+    id: String
+    maxHeight: Int
+    maxWidth: Int
+}
+
+type ContentSearch {
+    aggregations: [SearchAggregation!]
+    hits: Int
+    results: [SearchResult!]
+    timeTaken: Int
+}
+
+type Currency {
+    code: String
+    id: ID
+    prefix: String
+}
+
+type Curriculum {
+    "CEFR levels for this curriculum"
+    cefrLevels: [CefrLevel!]
+    cloze(id: ID!): Cloze
+    exercise(id: ID!): Exercise
+    learning: Language
+    "Levels within the curriculum for this language."
+    levels(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        from: Float,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        "Return only levels that can be added to unit queues"
+        queueableOnly: Boolean,
+        to: Float
+    ): LevelConnection
+    native: Language
+    phrase(id: ID!): Phrase
+    sequence(id: ID!): Sequence
+    topic(id: ID!): Topic
+    unit(id: ID!): Unit
+    units: [Unit!]
+    word(id: ID!): Word
+}
+
+type DailySummary {
+    day: DateTime!
+    language: Language!
+    xpDone: Int
+    xpGoal: Int
+}
+
+type Discount {
+    endDate: DateTime!
+    name: String!
+}
+
+type Discussion {
+    categoryLogo: String
+    categoryName: String
+    categorySlug: String
+    cooked: String
+    id: ID
+    lastPostedAt: DateTime
+    title: String
+    url: String
+}
+
+type Exercise {
+    L1Code: String
+    L1Instructions: String
+    L2Code: String
+    L2Instructions: String
+    exampleImageUrl: String
+    exampleText: String
+    id: Int
+    imageUrl: String
+    lastSeen: String
+    linkToItem: String
+    name: String
+    "The best rating given by tutor for this exercise, from 1-5"
+    rating: Int
+    reading: String
+    thumbnailUrl: String
+    timesSeen: Int
+}
+
+"The connection type for Exercise."
+type ExerciseConnection {
+    "A list of edges."
+    edges: [ExerciseEdge]
+    "A list of nodes."
+    nodes: [Exercise]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type ExerciseEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: Exercise
+}
+
+"Information about pagination in a connection."
+type ExtendedPageInfo {
+    "When paginating forwards, the cursor to continue."
+    endCursor: String
+    "When paginating forwards, are there more items?"
+    hasNextPage: Boolean!
+    "When paginating backwards, are there more items?"
+    hasPreviousPage: Boolean!
+    "A list of cursors for every page, to be used as the argument for `after`and where the page size is based on the value of `first` or `max_page_size`"
+    pageAfterCursors: [String!]!
+    "When paginating backwards, the cursor to continue."
+    startCursor: String
+}
+
+type FeatureOffer {
+    languageCode: LanguageEnum
+    "Name of the feature, e.g. 'transition_to_c1'"
+    name: String
+    state: FeatureOfferState
+    updatedAt: DateTime
+}
+
+type GenericChat {
+    chatableId: ID!
+    chatableType: ChatableType!
+    content: String!
+    createdAt: DateTime!
+    hidden: Boolean!
+    id: ID!
+    sentSeconds: Float
+    user: PublicUser!
+}
+
+"Autogenerated return type of GenericChatAdded"
+type GenericChatAddedPayload {
+    genericChat: GenericChat!
+}
+
+"The connection type for GenericChat."
+type GenericChatConnection {
+    "A list of edges."
+    edges: [GenericChatEdge]
+    "A list of nodes."
+    nodes: [GenericChat]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type GenericChatEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: GenericChat
+}
+
+"Autogenerated return type of GenericChatUpdated"
+type GenericChatUpdatedPayload {
+    genericChat: GenericChat!
+}
+
+type GenericReaction {
+    createdAt: DateTime!
+    emoji: String!
+    id: ID!
+    reactableId: ID!
+    reactableType: ReactableType!
+    sentSeconds: Int!
+    user: PublicUser!
+}
+
+"Autogenerated return type of GenericReactionAdded"
+type GenericReactionAddedPayload {
+    genericReaction: GenericReaction!
+}
+
+type GenericResponse {
+    createdAt: DateTime!
+    genericShowing: GenericShowing!
+    id: ID!
+    response: [String!]!
+    user: PublicUser!
+}
+
+"Autogenerated return type of GenericResponseAdded"
+type GenericResponseAddedPayload {
+    genericResponse: GenericResponse!
+}
+
+type GenericShowing {
+    closedSeconds: Int
+    genericResponses: [GenericResponse!]
+    id: ID!
+    presentable: Presentable!
+    sentSeconds: Int!
+    showable: Showable!
+}
+
+"Autogenerated return type of GenericShowingAdded"
+type GenericShowingAddedPayload {
+    genericShowing: GenericShowing!
+}
+
+type Goal {
+    endsAt: DateTime!
+    final: Int
+    kind: StatKind
+    percent: Int
+    progress: Int
+    startsAt: DateTime!
+    status: String
+}
+
+"Journal entry for a user"
+type Journal {
+    bodyMarkdown: String
+    correctedAt: DateTime
+    correctionUrl: String
+    createdAt: DateTime
+    exercise: Exercise
+    id: ID
+    requestCorrection: Boolean
+    title: String
+    updatedAt: DateTime
+    "The URL to the existing entry or the path for a new one"
+    url: String
+}
+
+type Language {
+    "ISO 639-1 Code."
+    code: String
+    id: ID
+    "localisation for L1 language"
+    label: String
+    "Levels within the curriculum for this language."
+    levels(activeOnly: Boolean, from: Float, to: Float): [Level!]
+    "Name of the language in English."
+    localizedName: String
+    "Name of the language, as used by its speakers."
+    name: String
+    pairedLanguages(minimumStatus: LanguagePairStatus = invite_only_early, nativeOrLearning: NativeLearningEnum!): [Language!]
+}
+
+type LeaderBoard {
+    countOfMembers: Int
+    currentUserPosition: LeaderBoardPosition
+    name: String
+    topPositions(limit: Int = 3): [LeaderBoardPosition!]
+}
+
+type LeaderBoardPosition {
+    languages: [Language!]
+    rank: Int
+    "Time in hours that the user has spent studying"
+    studyTime: Float
+    user: PublicUser
+}
+
+type LearnableUserStatus {
+    watchLater: Boolean
+}
+
+type Lesson {
+    description: String
+    iconUrl: String!
+    id: ID
+    label(format: String): String
+    languageCode: String
+    lesson: Int
+    name: String
+}
+
+"Minor level within the curriculum"
+type Level {
+    clozes: [Cloze!]
+    concepts: [Concept!]
+    countOfUnits: Int
+    coverImageUrl: String!
+    description: String
+    id: ID
+    "Shows if this level can be added to unit queues"
+    isQueueable: Boolean
+    label: String
+    language: Language
+    lessons: [Lesson!]
+    level: Int
+    levelString: String
+    name: String
+    phrases: [Phrase!]
+    "The current user's progress for this level"
+    progress: LevelProgress
+    readings: [Reading!]
+    sequences(all: Boolean): [Sequence!]
+    topics: [Topic!]
+    "Units are an augmented version of lessons where only Live units will be returned"
+    units: [Unit!]
+    words: [Word!]
+    "Prompts to elicit long-form written input from the user."
+    writingPrompts: [WritingPrompt!]
+}
+
+"The connection type for Level."
+type LevelConnection {
+    "A list of edges."
+    edges: [LevelEdge]
+    "A list of nodes."
+    nodes: [Level]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type LevelEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: Level
+}
+
+type LevelProgress {
+    "Amount of units in this level that are inside the current user's queue"
+    countOfQueuedUnits: Int
+}
+
+type LiveLesson {
+    completedAt: DateTime
+    completedMinutes: Float
+    language: Language
+    sessionId: String
+    startedAt: DateTime
+    student: PublicUser
+    tutor: PublicUser
+}
+
+"Studyable type for audio and video."
+type MediaSource implements Studyable & Unitable {
+    coverImageUrl: String
+    "When does the video end"
+    endTime: String
+    id: ID
+    language: Language
+    level: Level
+    linkToItem: String
+    "Type of media"
+    mediaKind: String
+    "URL to access media"
+    mediaUrl: String
+    "Latest rating by the current user"
+    rating: Int
+    "When does the video start"
+    startTime: String
+    studyableId: ID
+    studyableType: StudyableEnum
+    "How many times was it seen by the current user"
+    timesSeen: Int
+    title: String
+    "Array with transcript"
+    transcript: [TranscriptBit!]
+    unit: Lesson
+    unitableId: ID
+    unitableType: UnitableTypesEnum
+    updatedAt: DateTime
+}
+
+"Change things on Chatterbug!"
+type Mutation {
+    "Store email of a user who requested an invite to use a certain product"
+    requestUserInvite(
+        "User's email address"
+        email: String!,
+        "The product for which user is requesting an invite"
+        product: InviteProduct!
+    ): RequestUserInvitePayload
+    "Verifies access to the Streams Beta"
+    verifyStreamsAccess(code: String!): VerifyStreamsAccessPayload
+}
+
+type NotificationService {
+    identifier: String
+    role: DeviceRole
+}
+
+type Organization {
+    "A list of live lessons that were completed (most recent 100)"
+    completedLessons(
+        "Lesson started after this time"
+        startAfter: DateTime,
+        "Lesson started before this time"
+        startBefore: DateTime,
+        "User in your organization to filter by"
+        userId: ID
+    ): [LiveLesson!]
+    id: ID
+    members: [PublicUser!]
+    name: String
+}
+
+type Pattern implements Studyable & Unitable {
+    description: String
+    language: Language
+    level: Level
+    name: String
+    "Phrases with this pattern"
+    phrases: [Phrase!]
+    studyableId: ID
+    studyableType: StudyableEnum
+    unit: Lesson
+    unitableId: ID
+    unitableType: UnitableTypesEnum
+}
+
+type Phrase implements Studyable & Unitable {
+    "Examples generated for this phrase."
+    examples: [PhraseExample!]
+    language: Language
+    level: Level
+    "Template phrase used to generate the examples."
+    phrase: String
+    studyableId: ID
+    studyableType: StudyableEnum
+    unit: Lesson
+    unitableId: ID
+    unitableType: UnitableTypesEnum
+}
+
+"Explicit instance generated from a phrase type"
+type PhraseExample {
+    askLearning: StudyCardSide
+    askNative: StudyCardSide
+    "The id of the Phrase for this PhraseExample"
+    id: ID
+    "Recordings of this phrase example."
+    recordings: [Recording!]
+    "The example string itself."
+    text: String
+    translation(toLanguage: LanguageEnum!): Translation
+}
+
+type Plan {
+    amount: Int
+    code: String
+    credits: Int
+    currency: Currency
+    id: ID
+    label: String
+    perClass: Int
+}
+
+type PotentialAppointment {
+    duration: Int
+    endTime: DateTime
+    id: ID
+    language: Language
+    startTime: DateTime
+}
+
+type PredictionRecommendation {
+    liveLessonsPerWeek: Int
+    predictedGoalCompletionDate: DateTime
+    recommendedPlan: Plan
+}
+
+type ProductTourItem {
+    name: String
+}
+
+type Profile {
+    "Avatar image for this user"
+    avatarUrl: String
+    bio: String
+    "Discourse ingested content"
+    community: Community
+    "A list of all the languages the user is fluent in"
+    fluentLanguages: [Language!]
+    followers: [Profile!]
+    followersCount: Int!
+    followings: [Profile!]
+    followingsCount: Int!
+    id: ID
+    isFollowing: Boolean!
+    isStreamer: Boolean
+    isStudent: Boolean
+    isTutor: Boolean
+    link: String
+    location: String
+    login: String
+    name: String
+    streamsUserLanguages: [Language!]
+    "Stats and more for tutoring"
+    tutor: Tutor
+    userClubEvents(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): ClubEventConnection!
+    userShorts(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): ShortConnection!
+    userStreams(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): VideoConnection!
+}
+
+type Progress {
+    "What CEFR level is this user working on?"
+    cefrLevel: CefrLevel
+    "How far into this CEFR level has the user completed? (Between 0 and 1.)"
+    cefrLevelProgress: Float
+    "The certificate the user is aiming for (defaults to a1)"
+    certGoal: String @deprecated(reason: "Replaced by certGoalCefrLevel")
+    "The CEFR level of the certificate the user is aiming for"
+    certGoalCefrLevel: CefrLevel
+    "Which goals this user has for this week"
+    goals(kind: StatKind): [Goal!] @deprecated(reason: "Deprecated in favour of todaysGoals and weeklyGoals")
+    language: Language
+    level: String
+    "The portion of progress the user has made toward their certificate goal from 0 to 1"
+    progressTowardsCertGoal: Float
+    "What languages and how far this user has studied"
+    stats(interval: StatInterval = all, kinds: [StatKind!] = [cards, words, minutes], period: StatPeriod = week): [ProgressStat!]
+    "Today's goals for the current user"
+    todaysGoals(kind: StatKind = minutes): Goal
+    unit: Unit
+    "The weekly goals for the current user"
+    weeklyGoals(kind: StatKind = minutes): Goal
+}
+
+type ProgressStat {
+    count: Int
+    delta: String
+    kind: StatKind
+    period: StatPeriod
+    "A single day for which a certain stat can be queried"
+    time: String
+}
+
+type PublicUser {
+    "Avatar image for this user"
+    avatarUrl: String
+    "Language code the user wants the UI displayed in"
+    displayLanguage: String
+    displayName: String
+    "More human-readable timezone name"
+    friendlyTimezone: String
+    id: ID
+    isFollowing: Boolean!
+    isStreamer: Boolean
+    isStudent: Boolean
+    isTutor: Boolean
+    location: String
+    login: String
+    name: String
+    role: String
+    "Language code the user wants the Streams UI displayed in"
+    streamsDisplayLanguage: LanguageEnum
+    "Olson timezone name"
+    timezone: String
+    "If the user is also a tutor, this field contains some tutor stats"
+    tutor: Tutor
+    "Information about the user's XP"
+    xpInfo(code: LanguageEnum!): XpInfo!
+}
+
+"Look up things on Chatterbug!"
+type Query {
+    "Get (or create) the current study activity"
+    activity(
+        "Activity name (cards, media, ...)"
+        activityName: ActivityName,
+        "Language code (de, en, ...)"
+        code: LanguageEnum!,
+        "Resume the current activity (if any) - defaults to true. `false` value will tell the planner to skip the current activity"
+        resume: Boolean
+    ): Activity
+    alert(id: ID!): Alert
+    breadcrumbs(pathname: String!): [Breadcrumb!]
+    "List streamer channels"
+    channels(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        following: Boolean,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        learningLanguageCode: LanguageEnum!,
+        recommended: Boolean,
+        supporting: Boolean
+    ): StreamerConnection!
+    chattertags: [Chattertag!]
+    "Checks whether a device requires and upgrade based on their current version"
+    clientVersion(clientName: ClientNameEnum!, version: String!): ClientVersion
+    cloze(id: ID!): Cloze
+    "A live Club event retrieved by id"
+    clubEvent(id: ID!): ClubEvent
+    "Lists club events, sorted by the most recent first"
+    clubEvents(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Show events booked or not booked (accepted or waitlisted) by the current user - by default both are shown"
+        booked: Boolean,
+        cefrLevelCodes: [CefrLevelCode!],
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Filters by a particular group, which can be listed by calling clubEventGroups"
+        groupKind: String,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        learningLanguageCode: LanguageEnum,
+        status: ClubEventStatus = upcoming,
+        streamsLevels: [StreamsLevel!],
+        studentLanguageCode: LanguageEnum
+    ): ClubEventConnection!
+    contentBlock(contentContext: String!, languageCode: LanguageEnum!): ContentBlock
+    "Searches all our content and returns unified search results"
+    contentSearch(searchQuery: String!): ContentSearch
+    "Your own info on Chatterbug"
+    currentUser: User
+    curriculum(
+        "Student's learning language"
+        learning: LanguageEnum!,
+        "Student's native language"
+        native: LanguageEnum!
+    ): Curriculum
+    curriculumItem(id: ID!, type: String!): CurriculumItem
+    "Summary of work a user has done per day (returns max. 40 items)"
+    dailySummaries(
+        "Language code (de, en, ...)"
+        code: LanguageEnum!,
+        "DEPRECATED"
+        days: Int,
+        "Latest summary items - defaults to today"
+        endDate: CurrentUserDateTime,
+        "Earliest summary items - defaults to the beginning of the month"
+        startDate: CurrentUserDateTime
+    ): [DailySummary!]
+    "Fetch the last 100 chat messages"
+    genericChats(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        chatableId: ID!,
+        chatableType: ChatableType!,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): GenericChatConnection
+    genericReactions(reactableId: ID!, reactableType: ReactableType!): [GenericReaction!]
+    genericResponses(genericShowingId: ID!): [GenericResponse!]
+    journal(id: ID!): Journal
+    language(
+        "Language code (de, en, ...)"
+        code: LanguageEnum!
+    ): Language
+    leaderBoard: LeaderBoard
+    level(
+        levelId: ID!,
+        "Return only levels that can be added to unit queues"
+        queueableOnly: Boolean
+    ): Level
+    mediaSource(id: ID!): MediaSource
+    "A stylesheet generated for the webviews of the mobile app"
+    mobileAppStylesheet: Stylesheet
+    myCourse(
+        "Major level to display"
+        cefrLevel: CefrLevelCode,
+        "Student's learning language"
+        learning: LanguageEnum!,
+        "Student's native language"
+        native: LanguageEnum!
+    ): [Unit!]
+    "The next not completed course for the current user, based on the previously completed one"
+    nextStreamsCourse(learningLanguageCode: LanguageEnum!, studentLanguageCode: LanguageEnum): StreamsCourse
+    pattern(id: ID!): Pattern
+    phrase(id: ID!): Phrase
+    plans(currency: CurrencyInput): [Plan!]
+    "When a user can expect to complete a goal level and what plan is best suited"
+    predictedGoalCompletionDates(goalCefrLevel: CefrLevelCode, languageCode: LanguageEnum!, lessonCountMax: Int, lessonCountMin: Int): [PredictionRecommendation!]
+    productTour(
+        "For the page content or for the main menu?"
+        pageSection: String,
+        pathname: String!
+    ): [ProductTourItem!]
+    "Get a user's public info on Chatterbug"
+    profile(
+        "Which user to look up"
+        login: String!
+    ): Profile
+    "What languages and how far this user has studied"
+    progressForLanguages(
+        "Language code (de, en, ...)"
+        code: [LanguageEnum]
+    ): [Progress!]
+    reactionGroups(videoId: ID!): [VideoReactionGroup!]
+    reactions(videoId: ID!): [VideoReaction!] @deprecated(reason: "Due to performance reasons you should use reactionGroups instead")
+    reading(id: ID!): Reading
+    "A list of recommended activities"
+    recommendedActivities(
+        "Language code (de, en, ...)"
+        code: LanguageEnum!,
+        "A list of activity identifiers to exclude"
+        exclude: [String!]
+    ): [Activity!]
+    room(id: ID!): Room
+    sequence(id: ID!): Sequence
+    "What is on deck today for this user on Chatterbug"
+    sessionsForToday(
+        "Language code (de, en, ...)"
+        code: [LanguageEnum]
+    ): [Session!]
+    short(sluggable: String!): Short
+    "Lists shorts to show to a user"
+    shorts(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "If provided, the list starts with this short"
+        firstShortSluggable: String,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        learningLanguageCode: LanguageEnum,
+        streamsLevels: [StreamsLevel!],
+        studentLanguageCode: LanguageEnum,
+        tags: [String!]
+    ): ShortConnection!
+    "Flag for enabling subscriptions screen on streams mobile app"
+    showStreamsPaywall: Boolean
+    "A live or upcoming streams course retrieved by id"
+    streamsCourse(id: ID!): StreamsCourse
+    "List live and/or upcoming courses"
+    streamsCourses(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageLevelCode: String!,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        learningLanguageCode: LanguageEnum!,
+        statuses: [StreamsCourseStatus!] = [live],
+        studentLanguageCode: LanguageEnum
+    ): StreamsCourseConnection!
+    "List of language levels for which we have live or upcoming courses in the provided language pair"
+    streamsCoursesLanguageLevels(learningLanguageCode: LanguageEnum!, studentLanguageCode: LanguageEnum): [StreamsCoursesLanguageLevel!]!
+    "Get study cards"
+    studyCards(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        "Student's learning language"
+        learning: LanguageEnum!,
+        "Student's native language"
+        native: LanguageEnum!,
+        "Filter by a study card queue set type"
+        queue_set: StudyCardQueueSetEnum,
+        "Filter by studyable types"
+        studyable: [StudyableEnum!]
+    ): StudyCardConnection
+    topic(id: ID!): Topic
+    "Get the latest styles for topic explanations"
+    topicExplanationStylesheet: TopicExplanationStylesheet @deprecated(reason: "We now combine multiple stylesheets\n    for the app (not just topic explanations); use `mobile_app_stylesheet` fieldinstead.")
+    translate(content: String, fromLanguage: LanguageEnum!, toLanguage: LanguageEnum!): Translation
+    untranslated(canApprove: Boolean, fromLanguage: LanguageEnum!, level: String!, toLanguage: LanguageEnum!): Word
+    video(id: ID!): Video
+    videoAudience(videoId: ID!): [Viewer!] @deprecated(reason: "Non-performant endpoint")
+    videoAudienceCount(videoId: ID!): Int
+    videoCefrLevels: [CefrLevel!]
+    "Fetch the last 100 chat messages"
+    videoChats(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        videoId: ID!
+    ): VideoChatConnection
+    "Returns a paginated collection of videos visible to the current user with supplied filters applied"
+    videoCollection(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        cefrLevelCodes: [CefrLevelCode!],
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Deprecated in favour of groupKind"
+        group: VideoGroupKind,
+        "The group identifier"
+        groupKind: String,
+        languageCodes: [LanguageEnum!],
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        markers: [VideoMarker!],
+        searchQuery: String,
+        status: VideoStatus,
+        streamsLevels: [StreamsLevel!],
+        studentLanguageCode: LanguageEnum
+    ): VideoConnection
+    videoLanguages: [Language!]
+    videoQuiz(id: ID!): VideoQuiz
+    videoResponses(videoShowingId: ID!): [VideoResponse!] @deprecated(reason: "Non-performant endpoint, fetch video showing response counts instead")
+    videoShowing(id: ID!): VideoShowing
+    "Lists available experience levels, including a translated label"
+    videoStreamsLevels: [StreamsLevelDescription!]!
+    viewer(viewerId: ID!): Viewer
+    word(id: ID!): Word
+    words(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        language: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        query: String
+    ): WordConnection
+    "XP options for a user"
+    xpOptions(
+        "The language used to translate the labels"
+        languageCode: LanguageEnum
+    ): [XpOption!]
+}
+
+type QuizQuestion implements VideoLearnable {
+    answer: [String!]
+    answerType: String
+    id: ID!
+    imageUrl: String
+    lesson: Lesson!
+    orderNumber: Int!
+    prompt: [String!]
+    question: String
+    showType: String!
+}
+
+"Level-specifics changes to the feedback given to the user."
+type RatingPolicy {
+    "New prompt to replace the original prompt."
+    prompt: String
+    "New rating to replace the original rating."
+    rating: Int
+}
+
+"Studyable type for reading text, made up of sentences with parallel translations."
+type Reading implements Studyable & Unitable {
+    id: ID
+    language: Language
+    level: Level
+    linkToItem: String
+    "Set of paragraphs that make up the reading."
+    paragraphs: [ReadingParagraph!]
+    "Latest rating by the current user"
+    rating: Int
+    "The entire text of this reading."
+    reading: String
+    studyableId: ID
+    studyableType: StudyableEnum
+    title: String
+    unit: Lesson
+    unitableId: ID
+    unitableType: UnitableTypesEnum
+}
+
+"Paragraph, made up of sentences."
+type ReadingParagraph {
+    "Sentences that make up this paragraph."
+    sentences: [ReadingSentence!]
+}
+
+"Punctuated sentence, made up of one or more words"
+type ReadingSentence implements Translatable {
+    "The entire text of this sentence."
+    sentence: String
+    "The translations available for this sentence."
+    translations: [Translation!]
+    "The words that make up this sentence."
+    words: [ReadingWord!]
+}
+
+"Individual word with context-specific information."
+type ReadingWord {
+    "The word form as it appears in the reading."
+    form: String
+    "The canonical form of this word."
+    lemma: String
+    "The word linked from the curriculum."
+    word: Word
+    wordId: ID
+}
+
+"Audio recording"
+type Recording {
+    "MIME type for the audio file."
+    audioContentType: String
+    "The relative path of the file."
+    audioFileName: String
+    id: ID
+    "MP3 URL to download this audio"
+    recordingUrl: String
+    "The speaker being used for the audio recording."
+    speaker: String
+}
+
+"Autogenerated return type of RequestUserInvite"
+type RequestUserInvitePayload {
+    errors: [StandardError!]!
+}
+
+"Mapping from possible user input to a Chattertag"
+type Response {
+    active: Boolean
+    "The category of input that will be assigned."
+    chattertag: Chattertag
+    group: Int
+    human: Boolean
+    id: ID
+    "The language being elicited for this response."
+    language: Language
+    "The case-insensitive string to match against the user's input."
+    matchString: String
+    "Recommended rating policy for this user."
+    ratingPolicy: RatingPolicy
+    source: Response
+    step: Int
+}
+
+type Room {
+    "How to connect to this room via telco api"
+    apiKey: String
+    createdAt: DateTime
+    id: ID
+    role: RoomRole
+    telco: RoomTelco
+    "This session's unique label/connection string. May be null after creating since created via APIs"
+    token: String
+    updatedAt: DateTime
+    "How to connect to this room via JS"
+    userToken: String
+}
+
+type Root {
+    clubEventAboutToStart(clubEventId: ID!): ClubEventAboutToStartPayload!
+    clubEventEnded(clubEventId: ID!): ClubEventEndedPayload!
+    clubEventJoinersChanged(clubEventId: ID!): ClubEventJoinersChangedPayload!
+    clubEventMembersChanged(clubEventId: ID!): ClubEventMembersChangedPayload!
+    clubEventStarted(clubEventId: ID!): ClubEventStartedPayload!
+    genericChatAdded(chatableId: ID!, chatableType: ChatableType!): GenericChatAddedPayload!
+    genericChatUpdated(chatableId: ID!, chatableType: ChatableType!): GenericChatUpdatedPayload!
+    genericReactionAdded(reactableId: ID!, reactableType: ReactableType!): GenericReactionAddedPayload!
+    genericResponseAdded(genericShowingId: ID!): GenericResponseAddedPayload!
+    genericShowingAdded(presentableId: ID!, presentableType: String!, studentLanguageCode: LanguageEnum): GenericShowingAddedPayload!
+    videoAudienceChanged(videoId: ID!): VideoAudienceChangedPayload!
+    videoAudienceCountChanged(videoId: ID!): VideoAudienceCountChangedPayload!
+    videoChatAdded(videoId: ID!): VideoChatAddedPayload!
+    videoChatUpdated(videoId: ID!): VideoChatUpdatedPayload!
+    videoReactionAdded(videoId: ID!): VideoReactionAddedPayload!
+    videoReactionGroupsAdded(videoId: ID!): VideoReactionGroupsAddedPayload!
+    videoResponseAdded(videoId: ID!): VideoResponseAddedPayload!
+    videoShowingAdded(studentLanguageCode: LanguageEnum, videoId: ID!): VideoShowingAddedPayload!
+    videoUpdated(id: ID!): VideoUpdatedPayload!
+}
+
+"A slot in the schedule"
+type ScheduleSlot {
+    duration: Int
+    end: DateTime
+    start: DateTime
+    status: String
+}
+
+"Aggregations from a general search query"
+type SearchAggregation {
+    aggregationType: String!
+    objectType: SearchResultType!
+    results: [SearchAggregationResult!]!
+}
+
+"Aggregation result from a general search query"
+type SearchAggregationResult {
+    docCount: Int!
+    key: String!
+}
+
+type SearchResult {
+    highlights: [SearchResultHighlight!]
+    result: Searchable
+    score: Float
+    type: SearchResultType
+}
+
+type SearchResultHighlight {
+    field: String
+    html: String
+}
+
+"Studyable type made up of more than one token, to be tested progressively."
+type Sequence implements Studyable & Unitable {
+    "Link to edit this entity from the admin backend"
+    adminUrl: String
+    isLive: Boolean
+    "Presentable label for this sequence"
+    label: String
+    language: Language
+    learningOrder: Int
+    lesson: Lesson
+    level: Level
+    linkToItem: String
+    progress: StudyCardProgressTag @deprecated(reason: "This field is now available as part of Types::StudyCard")
+    "The responses available for this sequence."
+    responses: [Response!]
+    "Steps to test for this sequence"
+    steps: [StudyCardSide!]
+    studyCard: StudyCard
+    studyableId: ID
+    studyableType: StudyableEnum
+    translations(
+        "Language code (de, en, ...)"
+        code: [LanguageEnum!]
+    ): [Translation!]
+    unit: Lesson
+    unitableId: ID
+    unitableType: UnitableTypesEnum
+    "The words that make up this sequence."
+    words: [SequenceWord!]
+}
+
+"Word within a sequence."
+type SequenceWord {
+    id: ID
+    "The zero-base position of the word within the sequence."
+    position: Int
+    responses: [Response!]
+    "The order in which the word should be tested. Value of 0 means show from the start, and never test."
+    step: Int
+    "The word linked from the curriculum."
+    word: Word
+    "The word form as it appears in the reading."
+    wordForm: String
+}
+
+type Session {
+    "Lessons during this session"
+    appointments: [Appointment!]
+    "Minutes completed so far for this session"
+    done: Int
+    language: Language
+    "Minutes to reach for this session"
+    planned: Int
+    "Date key e.g. 2017-12-06"
+    when: String
+}
+
+type Short {
+    bookmarkCount: Int!
+    "Indicates if short can be reacted/responded to (as a challenge, etc)"
+    canReact: Boolean
+    children(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): ShortConnection!
+    childrenCount: Int!
+    commentCount: Int!
+    description: String
+    "Duration of Short in seconds"
+    durationSeconds: Int!
+    externalLinkImageUrl: String
+    externalLinkText: String
+    externalLinkUrl: String
+    id: ID
+    "The target language"
+    language: Language
+    likeCount: Int!
+    mp4Uri: String
+    "The parent of this short"
+    parent: Short
+    posterUri: String!
+    reported: Boolean!
+    "Total amount of viewings"
+    seenCount: Int!
+    shareCount: Int!
+    sluggable: String!
+    streamsLevel: StreamsLevel!
+    "The language the student speaks"
+    studentLanguage: Language
+    "The focus of the short (a video, word etc.)"
+    studyable: ShortStudyable
+    tags: [String!]
+    user: PublicUser!
+    userStatus: ShortUserStatus!
+    videoUri: String!
+    "Total amount of unique viewers"
+    viewerCount: Int!
+}
+
+"The connection type for Short."
+type ShortConnection {
+    "A list of edges."
+    edges: [ShortEdge]
+    "A list of nodes."
+    nodes: [Short]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type ShortEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: Short
+}
+
+type ShortUserStatus {
+    challengeCompleted: Boolean!
+    favorite: Boolean!
+    secondsSpent: Int!
+    seen: Boolean!
+    shared: Boolean!
+    timesSeen: Int!
+    watchLater: Boolean!
+}
+
+"A standard error return value"
+type StandardError {
+    "Simple code string for error"
+    code: String!
+    "Localized error message appropriate for end user"
+    message: String
+}
+
+type Streamer {
+    id: ID
+    lastStreamedAt: DateTime
+    liveStream: Video
+    livestreamUrl: String
+    nextStreamAt: DateTime
+    streamerLevel: Int!
+    thumbnailUrl: String
+    totalFollowers: Int!
+    totalStreams: Int!
+    totalSubscribers: Int!
+    user: PublicUser
+}
+
+"The connection type for Streamer."
+type StreamerConnection {
+    "A list of edges."
+    edges: [StreamerEdge]
+    "A list of nodes."
+    nodes: [Streamer]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type StreamerEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: Streamer
+}
+
+type StreamsCourse {
+    "Image shown on the course detail page"
+    bannerImageUrl: String!
+    "Image shown next to the course in the course list"
+    coverImageUrl: String!
+    description: String
+    id: ID!
+    "The next video to watch within this course"
+    nextVideo: Video
+    progress: StreamsCourseProgress
+    status: StreamsCourseStatus!
+    title: String!
+    "Videos that belong to the course"
+    videos: [Video!]!
+    watchedVideosGoal: Int!
+}
+
+"The connection type for StreamsCourse."
+type StreamsCourseConnection {
+    "A list of edges."
+    edges: [StreamsCourseEdge]
+    "A list of nodes."
+    nodes: [StreamsCourse]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type StreamsCourseEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: StreamsCourse
+}
+
+type StreamsCourseProgress {
+    completed: Boolean!
+    watchedVideosCount: Int!
+}
+
+type StreamsCoursesLanguageLevel {
+    "starter|beginner|elementary|intermediate|advanced"
+    code: String!
+    "translated based on User.display_language or English"
+    label: String!
+}
+
+type StreamsLanguageLevel {
+    languageCode: LanguageEnum!
+    streamsLevel: StreamsLevel
+    xpGoal: Int
+}
+
+type StreamsLearningItem {
+    id: ID
+    videoShowing: VideoShowing
+    watchLater: Boolean!
+}
+
+"The connection type for StreamsLearningItem."
+type StreamsLearningItemConnection {
+    "A list of edges."
+    edges: [StreamsLearningItemEdge]
+    "A list of nodes."
+    nodes: [StreamsLearningItem]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type StreamsLearningItemEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: StreamsLearningItem
+}
+
+type StreamsLevelDescription {
+    "The streams level code"
+    code: StreamsLevel
+    "The translated label of this streams level"
+    label: String
+}
+
+type StreamsSubscription {
+    expiresAt: DateTime
+}
+
+type StudyCard {
+    askLearningRating: Int
+    askNativeRating: Int
+    id: ID
+    introOrder: Int
+    nextReview: DateTime
+    progress: StudyCardProgressTag
+    queue: StudyableCardQueueEnum
+    recordingText: String
+    "MP3 URL to download this audio"
+    recordingUrl: String
+    studyable: Studyable
+    tooltip: String
+}
+
+"The connection type for StudyCard."
+type StudyCardConnection {
+    "A list of edges."
+    edges: [StudyCardEdge]
+    "A list of nodes."
+    nodes: [StudyCard]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type StudyCardEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: StudyCard
+}
+
+type StudyCardSide {
+    answer: [Answer!]
+    answerDescription: String
+    answerInput: String
+    answerLanguage: Language
+    answerPartOfSpeech: String
+    answerPlayable: String
+    answers: [String!] @deprecated(reason: "Use the answer field please!")
+    explanation: String
+    question: String
+    questionDescription: String
+    questionLanguage: Language
+    "Question plaintext title"
+    questionTitle: String
+    "Responses that require different treatment."
+    responses(top: Int): [Response!]
+    side: StudyCardSideEnum
+}
+
+type StudyGroup {
+    apiKey: String
+    durationInMinutes: Int!
+    endedAt: DateTime
+    host: PublicUser!
+    id: ID!
+    "Did the user prepare for this study group (eg watched the video)"
+    preparedFor: Boolean!
+    sessionToken: String
+    startedAt: DateTime
+    "The focus of the study group (a video, unit etc.)"
+    studyable: GroupStudyable!
+    tutor: PublicUser! @deprecated(reason: "The field was renamed to host")
+    userToken: String
+}
+
+type Stylesheet {
+    "Relative path to mobile app stylesheet"
+    url: String
+}
+
+type Subscription {
+    endAt: DateTime
+    plan: Plan
+    status: String
+}
+
+type Subtitle {
+    captionFormat: String
+    captionText: String
+    languageCode: LanguageEnum
+    transcript: String
+}
+
+"Onboarding Survey with question and answer"
+type Survey {
+    answer: String
+    createdAt: DateTime
+    question: String
+}
+
+"Studyable type for a collection of one or more clozes."
+type Topic implements Studyable {
+    "Cloze (gap-fill) exercises to test this topic"
+    clozes: [Cloze!]
+    "HTML for examples section (i.e. classic topic intro bottom)"
+    examples: String
+    "Markdown for examples section (i.e. classic topic intro bottom)"
+    examplesMarkdown: String
+    "HTML for topic explanation in student's native language"
+    explanation: String
+    "JSON for topic explanation in student's native language"
+    explanationJson: String
+    "Optional instructions to display when each cloze is tested"
+    instructions: String
+    "When and how to show the introduction or topic explanation"
+    introWith: TopicIntroWithEnum
+    "HTML for classic topic intro top"
+    introduction: String
+    "Markdown for classic topic intro top"
+    introductionMarkdown: String
+    isLive: Boolean
+    language: Language
+    "Order within the topics for this level (lowest values come first)."
+    learningOrder: Int
+    "For which unit is this topic introduced"
+    lesson: Lesson
+    level: Level
+    linkToItem: String
+    "Title of this topic"
+    name: String
+    studyableId: ID
+    studyableType: StudyableEnum
+    "How should the clozes be given to the student"
+    teachWith: TopicTeachWithEnum
+    timesSeen: Int!
+}
+
+type TopicExplanationStylesheet {
+    "Absolute path to file"
+    url: String
+}
+
+"Array with values for a single transcript bit."
+type TranscriptBit {
+    "Media time in seconds when the caption should stop being shown"
+    endAt: Float
+    "Media time in seconds when the caption should start being shown"
+    startAt: Float
+    "Text of the respective transcript bit"
+    text: String
+}
+
+"Single translation string, for a specified language."
+type Translation {
+    "The description to be shown to user."
+    description: String
+    "The ID of the translation"
+    id: ID
+    "Whether this translation is in the interchangeable set."
+    isInterchangeable: Boolean
+    "Target language of the translation."
+    language: Language
+    "The ranked order of preference for this translation (lower is preferred)."
+    preferenceOrder: Int
+    "The service or user that created this translation."
+    service: String
+    "The email of the user, for use as avatar key."
+    serviceAvatarEmail: String
+    "The translated string itself."
+    translation: String
+}
+
+type Tutor {
+    "Languages this tutor can do Live Lessons in"
+    approvedLanguages: [Language!]
+    "Available times to book an appointment, defaults to slots from today to one week from now"
+    bookableSlots(from: DateTime, numWeeks: Int): [ScheduleSlot!]
+    "The total amount of live lessons this tutor has performed"
+    countOfCompletedLiveLessons: Int
+    "The amount of lessons this tutor has performed with this user"
+    countOfJointLiveLessons: Int
+    "Is this tutor blocked in any language for this user"
+    isBlacklisted: Boolean @deprecated(reason: "Replaced with 'is_blocked'")
+    "Is this tutor blocked in any language for this user?"
+    isBlocked: Boolean
+    "Is this tutor favorited in any language for this user?"
+    isFavorite: Boolean
+}
+
+type Unit {
+    cefrLevel: String
+    concepts: [Concept!]
+    countOfConcepts: Int
+    countOfExercises: Int
+    countOfMedia: Int
+    countOfVocabulary: Int
+    countOfWords: Int
+    countOfWritingPrompts: Int
+    description: String
+    exercises(
+        "Include exercises that are not live?"
+        includeAll: Boolean
+    ): [Exercise!]
+    gid: String
+    iconUrl: String!
+    id: ID
+    isElective: Boolean!
+    label(format: String): String
+    languageCode: String
+    lesson: Int
+    level: Level
+    "Name of primary level containing this unit"
+    levelName: String
+    media: [MediaSource!]
+    name: String
+    numOfMediaItems: Int @deprecated(reason: "Replaced with 'count_of_media', this field is only used in the mobile app.")
+    numOfTopics: Int @deprecated(reason: "Replaced with 'count_of_concepts'")
+    numOfWords: Int @deprecated(reason: "Replaced with 'count_of_words'")
+    progress: UnitProgress
+    readings: [Reading!]
+    sequences: [Sequence!]
+    topics: [Topic!] @deprecated(reason: "Replaced with 'concepts'")
+    words: [Word!]
+    writingPrompts: [WritingPrompt!]
+}
+
+type UnitProgress {
+    concepts: MasteryLevel
+    countOfConceptsSeen: Int
+    countOfExercisesSeen: Int
+    countOfMediaSeen: Int
+    countOfVocabularySeen: Int
+    countOfWordsSeen: Int
+    countOfWritingsCompleted: Int
+    exercises: MasteryLevel
+    flashcards: MasteryLevel
+    isCompleted: Boolean
+    isCurrent: Boolean
+    isLearned: Boolean
+    isLocked: Boolean
+    isQueued: Boolean
+    isSkipped: Boolean
+    isUltraLearned: Boolean
+    media: MasteryLevel
+    percentOfExercisesSeen: Int
+    percentage: Float
+    queuePosition: Int
+    workingOnLiveLessons: Boolean
+    workingOnVocabulary: Boolean
+    writing: MasteryLevel
+}
+
+type User {
+    activeNotificationServices(role: DeviceRole): [NotificationService!]
+    availableCredits: Int
+    "Avatar image for this user"
+    avatarUrl: String
+    bio: String
+    canAccessClubs: Boolean
+    canAccessStreams: Boolean
+    canBookLesson(
+        "Student's learning language"
+        learning: LanguageEnum!,
+        "Student's native language"
+        native: LanguageEnum!
+    ): Boolean
+    canPayWithSepa: Boolean
+    "A list of the student's certificates, sorted in descending order of CEFR level"
+    certifications(code: LanguageEnum!, kinds: [CertificationKind!] = [major]): [Certification!]
+    "Lists all the possible club event groups this user has access to"
+    clubEventGroups: [ClubEventGroup!]!
+    compactTimezone: String
+    "A list of the student's completed appointments"
+    completedAppointments(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        code: LanguageEnum,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        "Lesson start after this time"
+        startAfter: DateTime,
+        "Lesson start before this time"
+        startBefore: DateTime
+    ): AppointmentConnection
+    "Date when the user was created"
+    createdAt: DateTime
+    "The current CEFR level this user is studying for"
+    currentCefrLevel(code: LanguageEnum!): UserLanguageCefrLevel
+    "The current unit the user is studying"
+    currentUnit(code: LanguageEnum!): Unit
+    "Language code the user wants the UI displayed in"
+    displayLanguage: String
+    displayName: String
+    "Available new languages that the user is currently not learning"
+    eligibleLearningLanguages: [Language!]
+    email: String
+    favoritedShorts(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): UserShortConnection!
+    favoritedVideos(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): UserVideoConnection!
+    "Information on new features offered to the user, e.g. transition from B2 to C1"
+    featureOffers: [FeatureOffer!]
+    "More human-readable timezone name"
+    friendlyTimezone: String
+    hasNewVideoQuizzes(languageCodes: [LanguageEnum!], since: DateTime!): Boolean
+    id: ID
+    "Hash for identifying this user on intercom"
+    intercomHash: String
+    "States whether this is a newly registered user"
+    isNew: Boolean!
+    isOverbooked: Boolean!
+    isOverextended: Boolean!
+    isStreamer: Boolean
+    isStudent: Boolean
+    isTutor: Boolean
+    "Last viewed activies"
+    lastActivity(code: LanguageEnum!, type: ActivityName!): Activity
+    "Last appointment"
+    lastAppointment(code: LanguageEnum!): Appointment
+    "Info on the last flashcard session in a specified language"
+    lastCardActivity(code: LanguageEnum!): CardActivity
+    lastCompletedCertification(cefrLevel: CefrLevelCode, code: LanguageEnum!, kinds: [CertificationKind!] = [major]): Certification
+    "Language you're currently learning"
+    learningLanguage: Language
+    link: String
+    location: String
+    login: String
+    monthlyCredits: Int
+    name: String
+    "OneSignal supports a higher security method known as Identity Verification. This helps prevent users from impersonating one another by generating a user-specific token on the server."
+    oneSignalExternalUserIdHash: String
+    "The organization that the user belongs to, if any"
+    organization: Organization
+    "The permissions the user has"
+    permissions: [String!]
+    personalSubscription: Subscription
+    "Potential appointments"
+    potentialAppointments: [PotentialAppointment!]
+    progress(code: LanguageEnum!): Progress
+    "At most 3 random queuable topics the user has not yet added to their queue"
+    recommendedTopics(code: LanguageEnum!): [Level!]
+    recordingPrivacyPreference: String
+    "Receives notifications when new post-stream quizzes are published"
+    remindedOfAllQuizzes: Boolean!
+    "Receives notifications before every Streams video"
+    remindedOfAllVideos: Boolean!
+    "Receives notifications when a booked (accepted/waitlisted) club event is about to start"
+    remindedOfBookedClubEvents: Boolean!
+    requestCreditCardWhenBooking: Boolean
+    role: String
+    savedShorts(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "If provided, the list starts with this short"
+        firstShortSluggable: String,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): UserShortConnection!
+    savedStreamsLearningItems(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): StreamsLearningItemConnection!
+    savedVideos(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCode: LanguageEnum,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): UserVideoConnection!
+    "Appointments that are missing a trainer"
+    searchingTrainingAppointments: [Appointment!]
+    shouldAskForProductFeedback(productName: ClientNameEnum!): Boolean
+    streamsAccessSource: StreamsAccessSource
+    streamsDiscountCurrentlyApplied: Discount
+    "Language code the user wants the Streams UI displayed in"
+    streamsDisplayLanguage: LanguageEnum
+    "All Streams languages & levels the user has accessed"
+    streamsLanguageLevels: [StreamsLanguageLevel!]
+    streamsStripeBillingPortalUrl: String
+    streamsStripeCheckoutUrl(couponCode: ID, locale: LanguageEnum, planId: ID!): String
+    streamsSubscriberId: ID
+    streamsSubscription: StreamsSubscription
+    "List of survey objects that contain question and answer fields"
+    surveys: [Survey!]
+    "Things a user has done"
+    timeline(events: [TimelineEventType!]!): [UserTimelineEvent!]
+    "Olson timezone name"
+    timezone: String
+    "The active tutors a user has had a lesson with"
+    tutors(code: LanguageEnum!, includeBlocked: Boolean = false): [Profile!]
+    "A list of CEFR levels this user is allowed to access"
+    unlockedCefrLevels(code: LanguageEnum!): [UserLanguageCefrLevel!]
+    "Upcoming appointments"
+    upcomingAppointments(
+        "Search for appointments for a specific user role"
+        role: UserAppointmentRoleEnum,
+        "Search for appointments that started for a given amount of minutes"
+        startedSinceMinutes: Int,
+        "Search for appointments that will start in a given amount of minutes"
+        startsInMinutes: Int,
+        status: AppointmentStatus
+    ): [Appointment!]
+    "Date when the user was last updated"
+    updatedAt: DateTime
+    "The UTM content code the user signed up with"
+    utmContent: String
+    "A list of video groups this user has access to"
+    videoGroups(includeCustom: Boolean = false, studentLanguageCode: LanguageEnum): [VideoGroup!]
+    videoQuizzes(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languageCodes: [LanguageEnum!],
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        studentLanguageCode: LanguageEnum
+    ): VideoQuizConnection
+    "Receives notifications before all Streams videos in a specific language"
+    videoReminderLanguages: [LanguageEnum!]
+    viewingProgress: ViewingProgress!
+    "Information about the user's XP"
+    xpInfo(code: LanguageEnum!): XpInfo!
+    "Information about the user's XP for all their Streams languages"
+    xpInfos: [XpInfo!]!
+}
+
+type UserLanguageCefrLevel {
+    "Cefr level progress of the current user that is between 0 and 1"
+    cefrLevelProgress: Float
+    "CEFR level as a parameter value (e.g. a1, b2)"
+    code: CefrLevelCode
+    "Description of what is accomplished over the course of this level"
+    description: String
+    id: ID
+    "A short, descriptive label of this CEFR level"
+    label: String
+    "Friendly text explaining what is expected at the midpoint of this level"
+    midpointDescription: String
+    "Friendly text explaining what is expected at the start of this level"
+    startingDescription: String
+}
+
+type UserShort {
+    createdAt: DateTime!
+    favorite: Boolean!
+    id: ID
+    lastSeenAt: DateTime!
+    secondsSpent: Int!
+    short: Short!
+    timesSeen: Int!
+    timesShared: Int!
+    watchLater: Boolean!
+}
+
+"The connection type for UserShort."
+type UserShortConnection {
+    "A list of edges."
+    edges: [UserShortEdge]
+    "A list of nodes."
+    nodes: [UserShort]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type UserShortEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: UserShort
+}
+
+type UserTimelineEvent {
+    firstSeen: DateTime
+    id: ID
+    language: Language
+    lastSeen: DateTime
+    name: String
+    timesSeen: Int
+}
+
+type UserVideo {
+    createdAt: DateTime!
+    favorite: Boolean!
+    id: ID
+    remindMe: Boolean!
+    timesSeen: Int!
+    video: Video!
+    watchLater: Boolean!
+}
+
+"The connection type for UserVideo."
+type UserVideoConnection {
+    "A list of edges."
+    edges: [UserVideoEdge]
+    "A list of nodes."
+    nodes: [UserVideo]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type UserVideoEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: UserVideo
+}
+
+type UserVideoQuizAnswer {
+    answer: [String!]!
+    correct: Boolean!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type UserVideoQuizQuestion {
+    quizAnswer: UserVideoQuizAnswer
+    quizQuestion: QuizQuestion!
+}
+
+"Autogenerated return type of VerifyStreamsAccess"
+type VerifyStreamsAccessPayload {
+    errors: [StandardError!]!
+    valid: Boolean!
+}
+
+type Video {
+    airedAt: DateTime @deprecated(reason: "Renaming to started_at")
+    "Indicates if the chat feature is enabled"
+    chatEnabled: Boolean!
+    completedAt: DateTime
+    description: String
+    durationSeconds: Float
+    farthestSeen: Float
+    fullyWatched: Boolean
+    id: ID
+    isSubscriber: Boolean!
+    isSupporter: Boolean!
+    "The target language"
+    language: Language
+    lesson: Unit
+    mp4Url: String
+    name: String
+    offsetSeconds: Int
+    "Indicates if video is not publicly available"
+    private: Boolean
+    scheduledAt: DateTime
+    secondsSpent: Float
+    startedAt: DateTime
+    streamer: Streamer
+    streamerThumbnailUrl: String
+    "The streams course (with the same language pair) that this video belongs to."
+    streamsCourse: StreamsCourse
+    streamsLevel: StreamsLevel!
+    "The language the student speaks"
+    studentLanguage: Language
+    "The subtitles associated with this video."
+    subtitles(languageCodes: [LanguageEnum!]): [Subtitle!]
+    "Indicates if the subtitles feature is enabled"
+    subtitlesEnabled: Boolean!
+    thumbnailUrl: String
+    userStatus: VideoUserStatus
+    "The video quiz associated with this video. The quiz might not be available to the current user yet - check the VideoQuiz.visibleToUser field."
+    videoQuiz: VideoQuiz
+    videoShowings: [VideoShowing!]
+    videoUrl: String
+    watched: Boolean
+}
+
+"Autogenerated return type of VideoAudienceChanged"
+type VideoAudienceChangedPayload {
+    "The full list of viewers for the video, sorted by the most recent first"
+    viewers: [Viewer!]!
+}
+
+"Autogenerated return type of VideoAudienceCountChanged"
+type VideoAudienceCountChangedPayload {
+    "The count of viewers for the video"
+    count: Int!
+}
+
+type VideoChat {
+    content: String!
+    createdAt: DateTime!
+    hidden: Boolean!
+    id: ID!
+    isSubscriber: Boolean!
+    isSupporter: Boolean!
+    sentSeconds: Float
+    video: Video!
+    viewer: Viewer!
+}
+
+"Autogenerated return type of VideoChatAdded"
+type VideoChatAddedPayload {
+    videoChat: VideoChat!
+}
+
+"The connection type for VideoChat."
+type VideoChatConnection {
+    "A list of edges."
+    edges: [VideoChatEdge]
+    "A list of nodes."
+    nodes: [VideoChat]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type VideoChatEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: VideoChat
+}
+
+"Autogenerated return type of VideoChatUpdated"
+type VideoChatUpdatedPayload {
+    videoChat: VideoChat!
+}
+
+"The connection type for Video."
+type VideoConnection {
+    "A list of edges."
+    edges: [VideoEdge]
+    "A list of nodes."
+    nodes: [Video]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type VideoEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: Video
+}
+
+type VideoGroup {
+    kind: String!
+    label: String!
+}
+
+type VideoQuiz {
+    coverImageUrl: String
+    description: String
+    id: ID!
+    title: String!
+    userVideoQuizQuestions: [UserVideoQuizQuestion!]
+    video: Video!
+    "States whether the quiz is visible to the user inside their quizzes section"
+    visibleToUser: Boolean!
+}
+
+"The connection type for VideoQuiz."
+type VideoQuizConnection {
+    "A list of edges."
+    edges: [VideoQuizEdge]
+    "A list of nodes."
+    nodes: [VideoQuiz]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type VideoQuizEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: VideoQuiz
+}
+
+type VideoReaction {
+    comment: String
+    createdAt: DateTime
+    emoji: String
+    id: ID
+    sentSeconds: Int
+    video: Video
+    viewer: Viewer
+}
+
+"Autogenerated return type of VideoReactionAdded"
+type VideoReactionAddedPayload {
+    videoReaction: VideoReaction!
+}
+
+type VideoReactionGroup {
+    count: Int!
+    emoji: String!
+    sentSeconds: Int!
+}
+
+"Autogenerated return type of VideoReactionGroupsAdded"
+type VideoReactionGroupsAddedPayload {
+    videoReactionGroups: [VideoReactionGroup!]!
+}
+
+type VideoResponse {
+    createdAt: DateTime
+    id: ID
+    response: [String!]
+    videoShowing: VideoShowing
+    viewer: Viewer
+}
+
+"Autogenerated return type of VideoResponseAdded"
+type VideoResponseAddedPayload {
+    videoResponse: VideoResponse!
+}
+
+type VideoResponseCount {
+    count: Int
+    response: String
+}
+
+"Overlapping subset of Video/Short types that can be returned from a search result"
+type VideoResult {
+    description: String
+    durationSeconds: Float
+    id: ID
+    name: String
+    startedAt: DateTime
+    streamer: String
+    streamsLevel: StreamsLevel!
+    thumbnailUrl: String
+    videoType: String
+}
+
+type VideoShowing {
+    closedSeconds: Int
+    id: ID
+    sentSeconds: Int
+    showable: Showable
+    userStatus: LearnableUserStatus!
+    video: Video
+    videoResponseCounts: [VideoResponseCount!]
+    videoResponseTotal: Int
+    videoResponses: [VideoResponse!]
+}
+
+"Autogenerated return type of VideoShowingAdded"
+type VideoShowingAddedPayload {
+    videoShowing: VideoShowing!
+}
+
+type VideoSlide implements VideoLearnable {
+    id: ID!
+    imageUrl: String
+    lesson: Lesson!
+    mainText: String
+    orderNumber: Int!
+    secondaryText: String
+    showType: String!
+}
+
+"Autogenerated return type of VideoUpdated"
+type VideoUpdatedPayload {
+    video: Video!
+}
+
+type VideoUserStatus {
+    favorite: Boolean
+    remindMe: Boolean
+    seen: Boolean
+    timesSeen: Int
+    watchLater: Boolean
+}
+
+type Viewer {
+    appVersion: String
+    createdAt: DateTime
+    currentStatus: String
+    deviceId: String
+    deviceName: String
+    id: ID
+    installationId: String
+    streak: Int @deprecated(reason: "Replaced by currentUser.viewingProgress")
+    totalSecondsSpent: Int @deprecated(reason: "Replaced by currentUser.viewingProgress")
+    updatedAt: DateTime
+    user: PublicUser
+    watchedVideos: Int @deprecated(reason: "Replaced by currentUser.viewingProgress")
+}
+
+type ViewingProgress {
+    accumulatedStreak(languageCode: LanguageEnum!): Int!
+    experiencePoints(languageCode: LanguageEnum): Int!
+    shortsExperiencePoints(languageCode: LanguageEnum): Int!
+    streak(languageCode: LanguageEnum): Int!
+    studyGroupsExperiencePoints(languageCode: LanguageEnum): Int!
+    totalCorrectQuizAnswers(languageCode: LanguageEnum): Int!
+    totalCoursesCompleted(languageCode: LanguageEnum): Int!
+    totalFullyWatched(languageCode: LanguageEnum): Int!
+    totalMinutesSpent(languageCode: LanguageEnum): Int!
+    totalQuizzesTaken(languageCode: LanguageEnum): Int!
+    totalSavedItems(languageCode: LanguageEnum): Int!
+    totalSecondsSpent(languageCode: LanguageEnum): Int!
+    totalShortsMinutesSpent(languageCode: LanguageEnum): Int!
+    totalShortsWatched(languageCode: LanguageEnum): Int!
+    totalStudyGroupsAttended(languageCode: LanguageEnum): Int!
+    totalStudyGroupsMinutes(languageCode: LanguageEnum): Int!
+    totalWatched(languageCode: LanguageEnum): Int!
+}
+
+"Studyable type made up of one token only."
+type Word implements Listenable & Studyable {
+    "Link to edit this entity from the admin backend"
+    adminUrl: String
+    askLearning: StudyCardSide
+    askNative: StudyCardSide
+    "Linguistic aspects of this word."
+    aspects(
+        "Filter by aspect types (i.e, gender)"
+        names: [AspectName!]
+    ): Aspect @deprecated(reason: "Use the learningAspects field instead please!")
+    fullTranslations(
+        "Language code (de, en, ...)"
+        code: [LanguageEnum!]
+    ): [Translation!]
+    language: Language
+    "Linguistic aspects of this word."
+    learningAspects(
+        "Filter by aspect types (i.e, gender)"
+        names: [AspectName!]
+    ): [Aspect!]
+    level: Level
+    linkToItem: String
+    "Grammatical category of this word (i.e, noun, verb etc.)"
+    partOfSpeech: String
+    progress: StudyCardProgressTag @deprecated(reason: "This field is now avaialble as part of studyCard")
+    "Audio recordings of this word."
+    recordings: [Recording!]
+    responses(
+        "Language code (de, en, ...)"
+        code: LanguageEnum!
+    ): [Response!]
+    studyCard: StudyCard
+    studyableId: ID
+    studyableType: StudyableEnum
+    translations: [String!]
+    usagePhrases: [PhraseExample!]
+    "The word string itself."
+    word: String
+}
+
+"The connection type for Word."
+type WordConnection {
+    "A list of edges."
+    edges: [WordEdge]
+    "A list of nodes."
+    nodes: [Word]
+    pageInfo: ExtendedPageInfo!
+}
+
+"An edge in a connection."
+type WordEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: Word
+}
+
+"Prompt to direct the user to write a journal."
+type WritingPrompt implements Studyable {
+    "Image from exercises/media_source associated with writing practice"
+    coverImageUrl: String
+    entry: Journal
+    hasEntry: Boolean
+    "Primary instructions for the writing task."
+    instructions: String
+    language: Language
+    level: Level
+    "Title of the writing topic."
+    name: String
+    studyableId: ID
+    studyableType: StudyableEnum
+    "Secondary prompt that suggests ideas and useful phrases."
+    writingPrompt: String
+}
+
+type XpInfo {
+    languageCode: LanguageEnum
+    todaysXpProgress: Int
+    xpGoal: Int
+}
+
+type XpOption {
+    name: String!
+    xpGoal: Int!
+}
+
+"What format does this activity have"
+enum ActivityFormat {
+    audio
+    cards
+    concept
+    placement
+    reading
+    reviewerrors
+    video
+    writing
+}
+
+"What this specific activity is about"
+enum ActivityName {
+    cards
+    conceptexplanation
+    journal
+    media
+    placement
+    reading
+    reviewerrors
+}
+
+"Status of an appointment"
+enum AppointmentStatus {
+    "Canceled"
+    canceled
+    "Both parties have confirmed"
+    confirmed
+    "Unconfirmed student"
+    pending
+    "Unconfirmed tutor"
+    searching
+}
+
+"The linguistic property being defined"
+enum AspectName {
+    aspirated_h
+    case
+    definite
+    gender
+    number
+    person
+    reflexive
+    tense
+    verbform
+}
+
+"A basic form of rating consisting of only two states: positive / negative"
+enum BasicRating {
+    negative
+    positive
+}
+
+"Types of content blocks that can be dynamically loaded"
+enum Block {
+    "Fixed content meant to be a single block"
+    fixed
+    "Wide content meant to scroll horizontally"
+    scrollhorizontal
+}
+
+enum CefrLevelCode {
+    "A1 (Beginner)"
+    a1
+    "A2 (Elementary)"
+    a2
+    "B1 (Intermediate)"
+    b1
+    "B2 (Upper Intermediate)"
+    b2
+    "C1 (Advanced)"
+    c1
+    "C2 (Mastery)"
+    c2
+}
+
+enum CertificationKind {
+    "The student passed this level successfully"
+    major
+    "The student passed this level with an insufficient rating"
+    partial_major
+}
+
+enum ChatableType {
+    ClubEvent
+}
+
+enum ClientNameEnum {
+    mobile
+    streams
+}
+
+enum ClubEventMembershipStatus {
+    accepted
+    canceled
+    pending
+    rejected
+    waitlisted
+}
+
+enum ClubEventStatus {
+    completed
+    ongoing
+    recommended
+    upcoming
+    upcoming_or_ongoing
+}
+
+enum CurrencyInput {
+    EUR
+    USD
+}
+
+enum DeviceRole {
+    "For iOS devices"
+    apn
+    "For desktop notifications"
+    desktop
+    "For email notifications"
+    email
+    "For Android devices"
+    gcm
+    "For sms notifications"
+    sms
+    "For Streams (iOS or Android) applications"
+    streams
+}
+
+"A state a feature offered to a user can be in"
+enum FeatureOfferState {
+    accepted
+    rejected
+    snoozed
+}
+
+"A product for which user can request an invite"
+enum InviteProduct {
+    chatterbug
+    streams
+}
+
+enum LanguageEnum {
+    "Deutsch"
+    de
+    "English"
+    en
+    "Español"
+    es
+    "Français"
+    fr
+    "Italiano"
+    it
+    "日本"
+    ja
+    "Polskie"
+    pl
+    "Português"
+    pt
+    "русский"
+    ru
+    "中文"
+    zh
+}
+
+"Status for this language pair"
+enum LanguagePairStatus {
+    "Available to Chatterbug admins only"
+    admins_only
+    "Hidden and not under development"
+    archived
+    "Hidden but under development"
+    hidden
+    "Available to invited users only; extra benefits"
+    invite_only_early
+    "Available to invited user only; no extras"
+    invite_only_late
+    "Available to everyone"
+    live
+}
+
+enum MasteryLevel {
+    "All material reviewed plus 'mastery' grade"
+    mastered
+    "All material has been reviewed"
+    seen
+    "Material has been started, but not fully reviewed"
+    started
+    "Material has not yet been started"
+    unstarted
+    "All material reviewed plus 'passing' grade"
+    verified
+}
+
+"Whether a language is spoken native or being learned."
+enum NativeLearningEnum {
+    "Learning language"
+    learning
+    "Native language"
+    native
+}
+
+enum PlannerType {
+    orientation
+    review
+    trainer
+    unit
+}
+
+enum ReactableType {
+    ClubEvent
+}
+
+"What this room is used for"
+enum RoomRole {
+    api
+    check
+    guest
+    lesson
+    study_group
+    waiting
+}
+
+"Service to create a room with"
+enum RoomTelco {
+    openvidu
+    tokbox
+}
+
+enum SearchResultType {
+    short
+    video
+}
+
+"Metric that determines how the returned data points are split -- either by day (array per day) or in its entirety (one array)"
+enum StatInterval {
+    "All-time data"
+    all
+    "Daily data"
+    daily
+}
+
+"What this specific stat is about"
+enum StatKind {
+    "Study cards"
+    cards
+    "Total minutes spent on studying cards"
+    cards_minutes
+    "Concepts completed"
+    concepts_completed
+    "Days to study"
+    days
+    "Cards user knows well"
+    known_cards
+    "Cards user is currently learning"
+    learning_cards
+    "Live lessons"
+    live_lesson
+    "All existing exercises"
+    live_lesson_all_existing_exercises
+    "Exercises feeling good"
+    live_lesson_exercises_feeling_good
+    "Total exercises completed by user"
+    live_lesson_total_exercises
+    "Total hours of live lessons"
+    live_lesson_total_hours
+    "Total lessons"
+    live_lesson_total_lessons
+    "Media completed"
+    media_completed
+    "Media mastered"
+    media_mastered
+    "Minutes of self-study"
+    minutes
+    "Minutes of self-study and live lessons"
+    total_minutes
+    "Words learned/learning"
+    words
+    "Journals completed"
+    writing_completed
+    "Tutor corrections"
+    writing_tutor_correction
+}
+
+"How long a specific stat was calculated for"
+enum StatPeriod {
+    "This month's stats"
+    month
+    "Last three months"
+    three_months
+    "All stats we have over time"
+    total
+    "This week's stats"
+    week
+}
+
+"Indicates which source is granting the user access to streams"
+enum StreamsAccessSource {
+    "From RevenueCat#store, purchased in Apple Store"
+    app_store
+    "Granted through a user's lessons subscription"
+    lessons
+    "From RevenueCat#store, purchased in Mac Apple Store"
+    mac_app_store
+    "User account has been given access through non-subscription means (admin, streamer, etc)"
+    other
+    "From RevenueCat#store, purchased in Google Play Store"
+    play_store
+    "From RevenueCat#store, granted through a promotion code"
+    promotional
+    "From Stripe Web Payments, matches values in RevenueCat#store, purchased in Google Play Store"
+    stripe
+    "Granted through a gift voucher"
+    voucher
+}
+
+enum StreamsCourseStatus {
+    live
+    upcoming
+}
+
+enum StreamsLevel {
+    advanced
+    basic @deprecated(reason: "Deprecated! Use `beginner` instead.")
+    beginner
+    elementary
+    intermediate
+    starter
+    zero @deprecated(reason: "Deprecated! Use `starter` instead.")
+}
+
+"How well a study card is known"
+enum StudyCardProgressTag {
+    improving
+    known
+    learning
+    mastered
+    new
+    well_known
+}
+
+enum StudyCardQueueSetEnum {
+    studied
+    unstudied
+}
+
+"Which card 'side' is in use"
+enum StudyCardSideEnum {
+    "Both learning and native languages"
+    both
+    "Learning language side"
+    learning
+    "Native language side"
+    native
+}
+
+"Which queue this card is in"
+enum StudyableCardQueueEnum {
+    learning
+    mastered
+    new
+    previewed
+    queued
+    retired
+    review
+}
+
+"The type of studyable"
+enum StudyableEnum {
+    Cloze
+    Phrase
+    Sequence
+    Topic
+    Word
+}
+
+"When to show the topic introduction and/or explanation to the student"
+enum TopicIntroWithEnum {
+    "Show topic examples before card study, then show the topic explanation activity after the topic or all clozes are studied"
+    examples_first
+    "Show the topic examples before card study, but no other explanation"
+    examples_only
+    "Show the topic explanation activity before card study with the topic or clozes"
+    explanation_first
+    "Do not show any introduction or explanation"
+    none
+    "Show the classic introduction during card study before testing the clozes"
+    old
+}
+
+"How to use the clozes to test this topic"
+enum TopicTeachWithEnum {
+    "Show all clozes each time topic is reviewed"
+    all_clozes
+    "Use a separately tracked study card for each cloze"
+    each_cloze
+    "Show one cloze at random"
+    one_cloze
+}
+
+"The type of object linked to the unit"
+enum UnitableTypesEnum {
+    Exercise
+    MediaSource
+    Pattern
+    Reading
+    Sequence
+    Topic
+    Word
+}
+
+enum UserAppointmentRoleEnum {
+    "For student role designations"
+    student
+    "For trainer role designations"
+    trainer
+    "For tutor role designations"
+    tutor
+}
+
+"Predefined groups of videos"
+enum VideoGroupKind {
+    "A list of videos at random levels aimed at new users"
+    intro
+    "Popular videos"
+    popular
+    "Recently aired videos"
+    recently_aired
+    "Videos that were recently watched by the current user"
+    recently_watched
+    "A list of video recommendations for the current user"
+    recommended
+}
+
+"Flags that can be set on videos"
+enum VideoMarker {
+    "Add to favorites"
+    favorite
+    "Remind when video is about to go live"
+    remind_me
+    "Seen"
+    seen
+    "Shared"
+    shared
+    "Unseen"
+    unseen
+    "Add to watch later list"
+    watch_later
+}
+
+enum VideoStatus {
+    "Completed"
+    completed
+    "Streaming"
+    streaming
+    "Upcoming"
+    upcoming
+}
+
+scalar CurrentUserDateTime
+
+scalar DateTime
+
+"Properties querying a timeline event"
+input TimelineEventType {
+    "Language for event; can be NULL for events that are not language specific."
+    code: LanguageEnum
+    "Name of event to find"
+    name: String!
+}
