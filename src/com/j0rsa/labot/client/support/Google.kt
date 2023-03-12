@@ -1,4 +1,4 @@
-package com.j0rsa.labot.client
+package com.j0rsa.labot.client.support
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO

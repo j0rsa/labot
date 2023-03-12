@@ -1,5 +1,6 @@
 package com.j0rsa.labot.client
 
+import com.j0rsa.labot.client.support.Tatoeba
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual

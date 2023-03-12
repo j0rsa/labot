@@ -31,6 +31,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
 }
 dependencies {
     implementation(Kotlin.stdlib)
@@ -62,6 +63,7 @@ dependencies {
         exclude(Dependencies.Graphql.jackson)
     }
     implementation(Dependencies.Graphql.serialization)
+    implementation(Dependencies.Telegram.bot)
 
     testImplementation(Dependencies.KoTest.runner)
     testImplementation(Dependencies.KoTest.assertions)

@@ -1,5 +1,6 @@
 package com.j0rsa.labot.client
 
+import com.j0rsa.labot.client.support.Google
 import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.*
@@ -62,7 +63,9 @@ class Skyeng(
                 append("Content-Type", "application/x-www-form-urlencoded")
             }
         }
-        return getJwt()
+        return getJwt().ifBlank {
+            throw IllegalStateException("Unable to login! Please check your credentials!")
+        }
     }
 
     private suspend fun getJwt(): String {
@@ -134,7 +137,8 @@ class Skyeng(
 
         @Serializable
         data class WordSet(
-            val meta: Meta, val data: List<WordSetData>
+            val meta: Meta,
+            val data: List<WordSetData>
         )
 
         @Serializable

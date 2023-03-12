@@ -9,9 +9,10 @@ object AppConfig {
 
 data class Config(
     val database: DatabaseConfig,
-    val anki: AnkiConfig,
+    val anki: Map<String, AnkiConfig>,
     val skyeng: SkyengConfig,
     val chatterbug: ChatterbugConfig,
+    val telegram: TelegramConfig,
 )
 
 data class DatabaseConfig(
@@ -35,4 +36,9 @@ data class SkyengConfig(
 data class ChatterbugConfig(
     val user: String,
     val password: String,
+)
+
+data class TelegramConfig(
+    val token: String,
+    val allowedUsers: List<Long>
 )

@@ -3,6 +3,7 @@ package com.j0rsa.labot.client
 import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.j0rsa.chatterbug.generated.UnitsWordsQuery
 import com.j0rsa.chatterbug.generated.enums.LanguageEnum
+import com.j0rsa.labot.client.support.Tatoeba
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
@@ -74,7 +75,7 @@ class Chatterbug(
                 }
 
                 val examples = Tatoeba.getVariousPhrases(originalPhrase)
-                examples.mapNotNull {
+                examples.map {
                     val cWrappedExample = it.phrase.wrapExampleInC1(originalPhrase)
                     val maskedText = """
                     |$cWrappedExample<br/>

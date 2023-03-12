@@ -75,6 +75,11 @@ object Dependencies {
         const val serialization = "com.expediagroup:graphql-kotlin-client-serialization:$version"
     }
 
+    object Telegram {
+        private const val version = "6.0.7"
+        const val bot = "io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:$version"
+    }
+
 
     object Mockk {
         const val lib = "io.mockk:mockk:1.13.3"
