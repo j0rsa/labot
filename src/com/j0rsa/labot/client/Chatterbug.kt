@@ -3,6 +3,7 @@ package com.j0rsa.labot.client
 import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.j0rsa.chatterbug.generated.UnitsWordsQuery
 import com.j0rsa.chatterbug.generated.enums.LanguageEnum
+import com.j0rsa.labot.StringUtils.similarityWith
 import com.j0rsa.labot.client.support.Tatoeba
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -15,7 +16,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Parameters
 import org.jsoup.Jsoup
 import java.net.URL
-import java.util.Locale
 
 class Chatterbug(
     private val user: String,
@@ -94,49 +94,10 @@ class Chatterbug(
                     )
                 }
             }?.flatten() ?: emptyList()
-        fun similarity(s1: String, s2: String): Double {
-            var longer = s1
-            var shorter = s2
-            if (s1.length < s2.length) { // longer should always have greater length
-                longer = s2
-                shorter = s1
-            }
-            val longerLength = longer.length
-            return if (longerLength == 0) {
-                1.0 /* both strings are zero length */
-            } else (longerLength - editDistance(longer, shorter)) / longerLength.toDouble()
-        }
 
-        // Example implementation of the Levenshtein Edit Distance
-        // See http://rosettacode.org/wiki/Levenshtein_distance#Java
-        private fun editDistance(s1: String, s2: String): Int {
-            var s1 = s1
-            var s2 = s2
-            s1 = s1.lowercase(Locale.getDefault())
-            s2 = s2.lowercase(Locale.getDefault())
-            val costs = IntArray(s2.length + 1)
-            for (i in 0..s1.length) {
-                var lastValue = i
-                for (j in 0..s2.length) {
-                    if (i == 0) costs[j] = j else {
-                        if (j > 0) {
-                            var newValue = costs[j - 1]
-                            if (s1[i - 1] != s2[j - 1]) newValue = Math.min(
-                                Math.min(newValue, lastValue),
-                                costs[j]
-                            ) + 1
-                            costs[j - 1] = lastValue
-                            lastValue = newValue
-                        }
-                    }
-                }
-                if (i > 0) costs[s2.length] = lastValue
-            }
-            return costs[s2.length]
-        }
         fun String.wrapExampleInC1(word: String): String {
             val wordToWrap = split(" ").map {
-                it to similarity(it.lowercase(), word.lowercase())
+                it to it.lowercase().similarityWith(word.lowercase())
             }.maxBy { it.second }.first.replace("[.,?!-:()]".toRegex(), "")
             return replace(wordToWrap, "{{c1::$wordToWrap}}")
         }

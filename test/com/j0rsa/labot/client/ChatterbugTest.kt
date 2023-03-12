@@ -1,7 +1,6 @@
 package com.j0rsa.labot.client
 
 import com.j0rsa.labot.AppConfig
-import com.j0rsa.labot.client.Chatterbug.Companion.similarity
 import com.j0rsa.labot.client.Chatterbug.Companion.wrapExampleInC1
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
@@ -15,16 +14,6 @@ class ChatterbugTest : StringSpec({
             .getWordsFromUnit("139")
         val json = Json { prettyPrint = true }
         println(json.encodeToString(res))
-    }
-
-    "check similarity" {
-        similarity("asd", "asd") shouldBe 1.0f
-        (similarity("oberflächlich", "Oberfläche".lowercase()) * 100).toInt() shouldBe 69
-
-        val word = "Oberfläche"
-        "Es gibt einige oberflächliche Gründe.".split(" ").map {
-            it to similarity(it, word)
-        }.maxBy { it.second }.first shouldBe "oberflächliche"
     }
 
     "c1 wrapped" {
