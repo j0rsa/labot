@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 object Main {
+    private val log = loggerFor<Main>()
     private val stateMap: MutableMap<Long, State> = mutableMapOf()
 
     private fun setState(userId: Long, state: State) {
@@ -137,6 +138,7 @@ object Main {
     }
 
     private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, updateAfter: LocalDate) {
+        log.info("Syncing skyeng after $updateAfter")
         val token = skyeng.login()
         token.ifEmpty {
             throw IllegalStateException("Unable to login! Please check the credentials!")
@@ -157,6 +159,7 @@ object Main {
     }
 
     private suspend fun chatterbugExportPerform(bot: Bot, chatId: ChatId, unitId: Long) {
+        log.info("Exporting chatterbug unit $unitId")
         val config = AppConfig.config.chatterbug
         val chatterbug = Chatterbug(config.user, config.password)
         val results = chatterbug.login().getWordsFromUnit(unitId.toString())
