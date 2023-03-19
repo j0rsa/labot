@@ -4,4 +4,4 @@ ARG JAR_FILE
 RUN mkdir -p /app
 WORKDIR /app
 COPY ${JAR_FILE} ./app.jar
-CMD ["java","-Djava.security.egd=file:/dev/./urandom -XX:+UseContainerSupport -XX:InitialRAMPercentage=80.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0","-jar","./app.jar"]
+CMD ["java","-Djava.security.egd=file:/dev/./urandom -XX:+UseContainerSupport -XX:InitialRAMPercentage=80.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -Dconfig.resource=/app/config/application.conf","-jar","./app.jar"]
