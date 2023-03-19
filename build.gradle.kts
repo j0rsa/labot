@@ -160,7 +160,7 @@ docker {
     val shadowJar: ShadowJar by tasks
     name = taggedDockerName
     setDockerfile(baseDockerFile)
-    tag("DockerTag", projectTag)
+    tag("DockerTag", taggedDockerName)
     buildArgs(
         mapOf(
             "JAR_FILE" to shadowJar.archiveFileName.get()
