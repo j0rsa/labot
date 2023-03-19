@@ -5,11 +5,8 @@ import io.kotest.matchers.shouldBe
 
 class AnkiTest : StringSpec({
     val anki = Anki("http://10.43.149.198")
-    "sync" {
+    "!sync" {
         val sync = anki.sync()
         sync.error shouldBe null
-    }
-
-    "addNote" {
     }
 })
