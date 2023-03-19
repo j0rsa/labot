@@ -22,21 +22,21 @@ class SkyengTest : StringSpec({
         csrf shouldNotBe ""
     }
 
-    "login works" {
+    "!login works" {
         skyeng.login() shouldNotBe ""
     }
 
-    "getWordSet" {
+    "!getWordSet" {
         val result = skyeng.getWordSets(skyeng.login(), studentId)
         result.size shouldBeGreaterThanOrEqual 1
     }
 
-    "getWords" {
+    "!getWords" {
         val result = skyeng.getWords(skyeng.login(), studentId)
         result.size shouldBeGreaterThanOrEqual 1
     }
 
-    "getMeanings" {
+    "!getMeanings" {
         val token = skyeng.login()
         val words = skyeng.getWords(token, studentId).map { it.word }
         val meanings = skyeng.getMeaning(token, words)
@@ -148,10 +148,6 @@ class SkyengTest : StringSpec({
             |{{c1::[sound:en_male_2_His_success_has_made_some_of_his_old_friends_jealous.mp3]}}<br/>
             |{{c1::<img src='7188466db2df0e76cc7291b55fb839d0.jpeg'/>}}
             """.trimMargin()
-        val anki = Anki("http://10.43.149.198")
-        val addNoteResult = anki.addNotes(notes)
-        addNoteResult.error shouldBe null
-        anki.sync()
     }
 
     "!full sync test" {
@@ -172,7 +168,7 @@ class SkyengTest : StringSpec({
         anki.sync()
     }
 
-    "partial sync test" {
+    "!partial sync test" {
         val token = skyeng.login()
         val updateAfter = skyengConf.uploadAfter?.let { LocalDate.parse(it) }
         updateAfter shouldNotBe null

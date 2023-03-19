@@ -13,10 +13,10 @@ import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.j0rsa.labot.client.Anki
 import com.j0rsa.labot.client.Chatterbug
 import com.j0rsa.labot.client.Skyeng
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import kotlinx.coroutines.runBlocking
 
 object Main {
     private val stateMap: MutableMap<Long, State> = mutableMapOf()
@@ -41,6 +41,7 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        println("Starting bot")
         bot {
             token = AppConfig.config.telegram.token
             dispatch {
@@ -100,7 +101,7 @@ object Main {
                             } catch (e: DateTimeParseException) {
                                 bot.sendMessage(
                                     ChatId.fromId(message.chat.id),
-                                    text = "Enter a date in format yyyy-mm-dd or tab the button below to use the last known",
+                                    "Enter a date in format yyyy-mm-dd or tab the button below to use the last known",
                                     replyMarkup = InlineKeyboardMarkup.create(
                                         listOf(
                                             InlineKeyboardButton.CallbackData(

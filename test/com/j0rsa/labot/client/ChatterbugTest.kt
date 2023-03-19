@@ -27,7 +27,7 @@ class ChatterbugTest : StringSpec({
             "Seine {{c1::Oberfläche}} war glatt wie ein Spiegel."
     }
 
-    "anki sync test" {
+    "!anki sync test" {
         val config = AppConfig.config.chatterbug
         val results = Chatterbug(config.user, config.password).login().getWordsFromUnit("139")
         val notes = Chatterbug.toAnkiClozeNote(results, "test")

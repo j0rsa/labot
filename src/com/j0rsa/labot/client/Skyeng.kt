@@ -1,17 +1,23 @@
 package com.j0rsa.labot.client
 
 import com.j0rsa.labot.client.support.Google
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.cookies.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
+import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.forms.submitForm
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.Parameters
+import io.ktor.http.URLBuilder
+import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
-import java.time.ZonedDateTime
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -23,6 +29,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
+import java.time.ZonedDateTime
 
 class Skyeng(
     private val user: String,
@@ -31,12 +38,14 @@ class Skyeng(
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                encodeDefaults = true
-                explicitNulls = false
-                ignoreUnknownKeys = true
-            })
+            json(
+                Json {
+                    prettyPrint = true
+                    encodeDefaults = true
+                    explicitNulls = false
+                    ignoreUnknownKeys = true
+                }
+            )
         }
         install(HttpCookies) {
             storage = AcceptAllCookiesStorage()
@@ -53,12 +62,15 @@ class Skyeng(
     }
 
     suspend fun login(): String {
-        client.submitForm("$host/frame/login-submit", Parameters.build {
-            append("username", user)
-            append("password", password)
-            append("redirect", "https://skyeng.ru/")
-            append("csrfToken", getCsrf())
-        }) {
+        client.submitForm(
+            "$host/frame/login-submit",
+            Parameters.build {
+                append("username", user)
+                append("password", password)
+                append("redirect", "https://skyeng.ru/")
+                append("csrfToken", getCsrf())
+            }
+        ) {
             headers {
                 append("Content-Type", "application/x-www-form-urlencoded")
             }

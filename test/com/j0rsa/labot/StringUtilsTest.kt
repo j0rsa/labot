@@ -14,5 +14,4 @@ class StringUtilsTest : StringSpec({
             it to it.similarityWith(word)
         }.maxBy { it.second }.first shouldBe "oberflächliche"
     }
-
 })

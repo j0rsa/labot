@@ -4,7 +4,7 @@ import com.j0rsa.labot.loggerFor
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.*
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
@@ -84,7 +84,9 @@ class Anki(
     companion object {
         @Serializable
         data class Action(
-            val version: Int = 6, val action: String, val params: NoteWrapper? = null
+            val version: Int = 6,
+            val action: String,
+            val params: NoteWrapper? = null
         )
 
         @Serializable
@@ -130,7 +132,9 @@ class Anki(
 
         @Serializable
         data class Attachment(
-            val url: String = "", val filename: String = "", val fields: Collection<String> = listOf("Extra")
+            val url: String = "",
+            val filename: String = "",
+            val fields: Collection<String> = listOf("Extra")
         )
     }
 }
