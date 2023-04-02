@@ -31,7 +31,7 @@ class Anki(
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient(CIO) {
         install(HttpRequestRetry) {
-            maxRetries = 5
+            maxRetries = 20
             retryIf { _, response ->
                 !response.status.isSuccess()
             }
@@ -61,6 +61,7 @@ class Anki(
 
     suspend fun sync() = sendAction("sync")
 
+    @Suppress("unused")
     suspend fun addNote(note: Note) = sendAction("addNote", note)
 
     suspend fun addNotes(notes: Collection<Note>) = run {

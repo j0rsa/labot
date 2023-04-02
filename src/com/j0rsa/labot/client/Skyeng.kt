@@ -18,6 +18,7 @@ import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
+import java.nio.charset.Charset
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -56,7 +57,7 @@ class Skyeng(
     private val apiHost = "https://api.words.skyeng.ru/api"
     private val dictionaryHost = "https://dictionary.skyeng.ru/api"
     suspend fun getCsrf(): String {
-        val responseText = client.get("$host/login").bodyAsText()
+        val responseText = client.get("$host/login").bodyAsText(Charset.defaultCharset())
         val jsoup = Jsoup.parse(responseText)
         return jsoup.select("input[name=csrfToken]").first()?.attr("value") ?: ""
     }
@@ -243,10 +244,12 @@ class Skyeng(
             }
         }
 
+        @Suppress("unused")
         enum class Language {
             EN, RU
         }
 
+        @Suppress("unused")
         enum class Voice {
             Male1, Male2, Female1, Female2;
 

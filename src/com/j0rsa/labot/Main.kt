@@ -143,6 +143,7 @@ object Main {
         token.ifEmpty {
             throw IllegalStateException("Unable to login! Please check the credentials!")
         }
+        log.info("Fetching words...")
         val words = skyeng.getWords(token, AppConfig.config.skyeng.studentId).map { it.word }
             .filter { it.createdAt.toLocalDate() > updateAfter }
         bot.sendMessage(chatId, "Fetched words: ${words.size}")
