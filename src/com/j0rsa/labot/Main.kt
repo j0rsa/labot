@@ -141,6 +141,8 @@ object Main {
         log.info("Syncing skyeng after $updateAfter")
         val token = skyeng.login()
         token.ifEmpty {
+            log.error("Unable to login!")
+            bot.sendMessage(chatId, "Unable to login!")
             throw IllegalStateException("Unable to login! Please check the credentials!")
         }
         log.info("Fetching words...")
