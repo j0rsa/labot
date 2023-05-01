@@ -1,11 +1,12 @@
 package com.j0rsa.labot.client
 
 import com.j0rsa.labot.client.support.Google
-import com.j0rsa.labot.ktor.SessionCookiesStorage
+import com.j0rsa.labot.ktor.SetCookie
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.forms.submitForm
@@ -37,7 +38,6 @@ class Skyeng(
     private val password: String,
 ) {
 
-    private val cookiesStorage = SessionCookiesStorage()
 
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient(CIO) {
@@ -52,7 +52,7 @@ class Skyeng(
             )
         }
         install(HttpCookies) {
-            storage = cookiesStorage
+            storage = AcceptAllCookiesStorage()
         }
     }
 
@@ -60,9 +60,8 @@ class Skyeng(
     private val apiHost = "https://api.words.skyeng.ru/api"
     private val dictionaryHost = "https://dictionary.skyeng.ru/api"
 
-    suspend fun clearCookies() {
-        cookiesStorage.clear()
-    }
+    private var authCookie: SetCookie? = null
+
     suspend fun getCsrf(): String {
         val responseText = client.get("$host/login").bodyAsText(Charset.defaultCharset())
         val jsoup = Jsoup.parse(responseText)
@@ -70,6 +69,11 @@ class Skyeng(
     }
 
     suspend fun login(): String {
+        authCookie?.let {
+            if (!it.isExpired()) {
+                return it.value
+            }
+        }
         client.submitForm(
             "$host/frame/login-submit",
             Parameters.build {
@@ -91,7 +95,9 @@ class Skyeng(
     private suspend fun getJwt(): String {
         val response = client.post("$host/user-api/v1/auth/jwt")
         return response.headers.getAll("Set-Cookie")?.firstOrNull()?.let {
-            it.split("; ").firstOrNull()?.split("=")?.lastOrNull()
+            val cookie = SetCookie.parse(it)
+            authCookie = cookie
+            cookie?.value
         } ?: ""
     }
 

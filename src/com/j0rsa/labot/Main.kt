@@ -138,7 +138,6 @@ object Main {
     }
 
     private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, updateAfter: LocalDate) {
-        skyeng.clearCookies()
         log.info("Syncing skyeng after $updateAfter")
         val token = skyeng.login()
         token.ifEmpty {
