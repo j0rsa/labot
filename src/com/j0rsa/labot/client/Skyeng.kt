@@ -1,11 +1,11 @@
 package com.j0rsa.labot.client
 
 import com.j0rsa.labot.client.support.Google
+import com.j0rsa.labot.ktor.SessionCookiesStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.forms.submitForm
@@ -36,6 +36,9 @@ class Skyeng(
     private val user: String,
     private val password: String,
 ) {
+
+    private val cookiesStorage = SessionCookiesStorage()
+
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -49,13 +52,17 @@ class Skyeng(
             )
         }
         install(HttpCookies) {
-            storage = AcceptAllCookiesStorage()
+            storage = cookiesStorage
         }
     }
 
     private val host = "https://id.skyeng.ru"
     private val apiHost = "https://api.words.skyeng.ru/api"
     private val dictionaryHost = "https://dictionary.skyeng.ru/api"
+
+    suspend fun clearCookies() {
+        cookiesStorage.clear()
+    }
     suspend fun getCsrf(): String {
         val responseText = client.get("$host/login").bodyAsText(Charset.defaultCharset())
         val jsoup = Jsoup.parse(responseText)

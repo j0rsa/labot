@@ -13,10 +13,10 @@ import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.j0rsa.labot.client.Anki
 import com.j0rsa.labot.client.Chatterbug
 import com.j0rsa.labot.client.Skyeng
-import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import kotlinx.coroutines.runBlocking
 
 object Main {
     private val log = loggerFor<Main>()
@@ -138,6 +138,7 @@ object Main {
     }
 
     private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, updateAfter: LocalDate) {
+        skyeng.clearCookies()
         log.info("Syncing skyeng after $updateAfter")
         val token = skyeng.login()
         token.ifEmpty {
