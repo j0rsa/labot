@@ -2,6 +2,7 @@ package com.j0rsa.labot.client
 
 import com.j0rsa.labot.client.support.Google
 import com.j0rsa.labot.ktor.SetCookie
+import com.j0rsa.labot.loggerFor
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -37,7 +38,7 @@ class Skyeng(
     private val user: String,
     private val password: String,
 ) {
-
+    private val log = loggerFor<Skyeng>()
 
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient(CIO) {
@@ -69,11 +70,15 @@ class Skyeng(
     }
 
     suspend fun login(): String {
+        log.info("Login")
         authCookie?.let {
+            log.info("auth cookie exists")
             if (!it.isExpired()) {
+                log.info("auth cookie not yet expired")
                 return it.value
             }
         }
+        log.info("Performing login")
         client.submitForm(
             "$host/frame/login-submit",
             Parameters.build {
@@ -93,10 +98,14 @@ class Skyeng(
     }
 
     private suspend fun getJwt(): String {
+        log.info("Getting JWT")
         val response = client.post("$host/user-api/v1/auth/jwt")
-        return response.headers.getAll("Set-Cookie")?.firstOrNull()?.let {
+        val setCookies = response.headers.getAll("Set-Cookie")
+        log.info("Setting cookies returned: ${setCookies?.size}")
+        return setCookies?.firstOrNull()?.let {
             val cookie = SetCookie.parse(it)
             authCookie = cookie
+            log.info("New auth cookie persisted")
             cookie?.value
         } ?: ""
     }

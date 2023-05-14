@@ -16,6 +16,7 @@ import com.j0rsa.labot.client.Skyeng
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import kotlin.system.exitProcess
 import kotlinx.coroutines.runBlocking
 
 object Main {
@@ -47,6 +48,7 @@ object Main {
             token = AppConfig.config.telegram.token
             dispatch {
                 callbackQuery {
+                    if (callbackQuery.from.id !in AppConfig.config.telegram.allowedUsers) return@callbackQuery
                     when (callbackQuery.data.split(":").firstOrNull()) {
                         State.SkyengSync.name -> {
                             val date = LocalDate.parse(callbackQuery.data.split(":")[1])
@@ -66,6 +68,7 @@ object Main {
                     )
                 }
                 command("skyeng_sync") {
+                    if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@command
                     val userId = message.from?.id ?: return@command
                     setState(userId, State.SkyengSync)
                     bot.sendMessage(
@@ -82,9 +85,16 @@ object Main {
                     )
                 }
                 command("chatterbug_export") {
+                    if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@command
                     val userId = message.from?.id ?: return@command
                     setState(userId, State.ChatterbugExport)
                     bot.sendMessage(ChatId.fromId(message.chat.id), "Which unit id do you want to export?")
+                }
+
+                command("restart") {
+                    if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@command
+                    bot.sendMessage(ChatId.fromId(message.chat.id), "See you in a bit")
+                    exitProcess(0)
                 }
 
                 message(Filter.Text and Filter.Command.not()) {
@@ -140,6 +150,7 @@ object Main {
     private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, updateAfter: LocalDate) {
         log.info("Syncing skyeng after $updateAfter")
         val token = skyeng.login()
+        log.info("Logged in and received token")
         token.ifEmpty {
             log.error("Unable to login!")
             bot.sendMessage(chatId, "Unable to login!")
