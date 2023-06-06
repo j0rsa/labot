@@ -40,22 +40,23 @@ class Skyeng(
 ) {
     private val log = loggerFor<Skyeng>()
 
-    @OptIn(ExperimentalSerializationApi::class)
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    prettyPrint = true
-                    encodeDefaults = true
-                    explicitNulls = false
-                    ignoreUnknownKeys = true
-                }
-            )
+    private var client = httpClient()
+
+    private fun httpClient() = HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        prettyPrint = true
+                        encodeDefaults = true
+                        explicitNulls = false
+                        ignoreUnknownKeys = true
+                    }
+                )
+            }
+            install(HttpCookies) {
+                storage = AcceptAllCookiesStorage()
+            }
         }
-        install(HttpCookies) {
-            storage = AcceptAllCookiesStorage()
-        }
-    }
 
     private val host = "https://id.skyeng.ru"
     private val apiHost = "https://api.words.skyeng.ru/api"
@@ -79,6 +80,8 @@ class Skyeng(
             }
         }
         log.info("Performing login")
+        // reset client
+        client = httpClient()
         client.submitForm(
             "$host/frame/login-submit",
             Parameters.build {
