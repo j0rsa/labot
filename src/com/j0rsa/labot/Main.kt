@@ -59,7 +59,9 @@ object Main {
                             val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
                             runBlocking {
                                 AppConfig.config.skyeng.studentId.map { (alias, id) ->
-                                    skyengSyncPerform(bot, ChatId.fromId(chatId), id.toString(), date, ankis[alias]!!)
+                                    val chatId = ChatId.fromId(chatId)
+                                    bot.sendMessage(chatId, "Processing: $alias")
+                                    skyengSyncPerform(bot, chatId, id.toString(), date, ankis[alias]!!)
                                 }
                             }
                         }
@@ -113,7 +115,9 @@ object Main {
                                 val updateAfter: LocalDate = LocalDate.parse(text)
                                 runBlocking {
                                     AppConfig.config.skyeng.studentId.map { (alias, id) ->
-                                        skyengSyncPerform(bot, ChatId.fromId(message.chat.id), id.toString(), updateAfter, ankis[alias]!!)
+                                        val chatId = ChatId.fromId(message.chat.id)
+                                        bot.sendMessage(chatId, "Processing: $alias")
+                                        skyengSyncPerform(bot, chatId, id.toString(), updateAfter, ankis[alias]!!)
                                     }
                                 }
                                 setState(userId, State.None)
