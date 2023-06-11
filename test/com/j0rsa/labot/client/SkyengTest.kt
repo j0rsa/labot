@@ -27,18 +27,18 @@ class SkyengTest : StringSpec({
     }
 
     "!getWordSet" {
-        val result = skyeng.getWordSets(skyeng.login(), studentId)
+        val result = skyeng.getWordSets(skyeng.login(), studentId.toString())
         result.size shouldBeGreaterThanOrEqual 1
     }
 
     "!getWords" {
-        val result = skyeng.getWords(skyeng.login(), studentId)
+        val result = skyeng.getWords(skyeng.login(), studentId.toString())
         result.size shouldBeGreaterThanOrEqual 1
     }
 
     "!getMeanings" {
         val token = skyeng.login()
-        val words = skyeng.getWords(token, studentId).map { it.word }
+        val words = skyeng.getWords(token, studentId.toString()).map { it.word }
         val meanings = skyeng.getMeaning(token, words)
         meanings.size shouldBe words.size
     }
@@ -152,7 +152,7 @@ class SkyengTest : StringSpec({
 
     "!full sync test" {
         val token = skyeng.login()
-        val words = skyeng.getWords(token, studentId).map { it.word }
+        val words = skyeng.getWords(token, studentId.toString()).map { it.word }
         println("Fetched words: ${words.size}")
         // on prod +1 step: to filter out old words
         val meanings = skyeng.getMeaning(token, words)
@@ -172,7 +172,7 @@ class SkyengTest : StringSpec({
         val token = skyeng.login()
         val updateAfter = skyengConf.uploadAfter?.let { LocalDate.parse(it) }
         updateAfter shouldNotBe null
-        val words = skyeng.getWords(token, studentId).map { it.word }
+        val words = skyeng.getWords(token, studentId.toString()).map { it.word }
             .filter { it.createdAt.toLocalDate() > updateAfter!! }
         println("Fetched words: ${words.size}")
         // on prod +1 step: to filter out old words
