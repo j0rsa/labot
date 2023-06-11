@@ -36,10 +36,14 @@ object Main {
     private var lastSkyengUpdate = AppConfig.config.skyeng.uploadAfter
         ?: LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_LOCAL_DATE)
 
-    private val ankiTvConfig = AppConfig.config.anki["tv"]!!
-    private val ankiTv = Anki(ankiTvConfig.url)
-    private val ankiKConfig = AppConfig.config.anki["k"]!!
-    private val ankiK = Anki(ankiKConfig.url)
+    private val ankiKDeConfig = AppConfig.config.anki["k_de"]!!
+    private val ankiKDe = Anki(ankiKDeConfig.url)
+
+    private val ankis = AppConfig.config.skyeng.studentId.map { (k,_) ->
+        val config = AppConfig.config.anki[k]!!
+        val instance = Anki(config.url)
+        k to instance
+    }.toMap()
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -54,7 +58,9 @@ object Main {
                             val date = LocalDate.parse(callbackQuery.data.split(":")[1])
                             val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
                             runBlocking {
-                                skyengSyncPerform(bot, ChatId.fromId(chatId), date)
+                                AppConfig.config.skyeng.studentId.map { (alias, id) ->
+                                    skyengSyncPerform(bot, ChatId.fromId(chatId), id.toString(), date, ankis[alias]!!)
+                                }
                             }
                         }
 
@@ -106,7 +112,9 @@ object Main {
                             try {
                                 val updateAfter: LocalDate = LocalDate.parse(text)
                                 runBlocking {
-                                    skyengSyncPerform(bot, ChatId.fromId(message.chat.id), updateAfter)
+                                    AppConfig.config.skyeng.studentId.map { (alias, id) ->
+                                        skyengSyncPerform(bot, ChatId.fromId(message.chat.id), id.toString(), updateAfter, ankis[alias]!!)
+                                    }
                                 }
                                 setState(userId, State.None)
                             } catch (e: DateTimeParseException) {
@@ -147,7 +155,7 @@ object Main {
         }.startPolling()
     }
 
-    private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, updateAfter: LocalDate) {
+    private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, studentId: String, updateAfter: LocalDate, anki: Anki) {
         log.info("Syncing skyeng after $updateAfter")
         val token = skyeng.login()
         log.info("Logged in and received token")
@@ -157,7 +165,7 @@ object Main {
             throw IllegalStateException("Unable to login! Please check the credentials!")
         }
         log.info("Fetching words...")
-        val words = skyeng.getWords(token, AppConfig.config.skyeng.studentId).map { it.word }
+        val words = skyeng.getWords(token, studentId).map { it.word }
             .filter { it.createdAt.toLocalDate() > updateAfter }
         bot.sendMessage(chatId, "Fetched words: ${words.size}")
         val meanings = skyeng.getMeaning(token, words)
@@ -165,9 +173,9 @@ object Main {
         val notes = meanings.flatMap { it.toAnkiClozeNote("skyeng") }.filterNotNull()
         bot.sendMessage(chatId, "Detected notes: ${notes.size}")
         bot.sendMessage(chatId, "Uploading notes")
-        ankiTv.addNotes(notes)
+        anki.addNotes(notes)
         bot.sendMessage(chatId, "Syncing")
-        ankiTv.sync()
+        anki.sync()
         bot.sendMessage(chatId, "Done!")
         lastSkyengUpdate = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
     }
@@ -181,9 +189,9 @@ object Main {
         val notes = Chatterbug.toAnkiClozeNote(results, "test")
         bot.sendMessage(chatId, "Composed ${notes.size} notes")
         bot.sendMessage(chatId, "Uploading notes")
-        ankiK.addNotes(notes)
+        ankiKDe.addNotes(notes)
         bot.sendMessage(chatId, "Syncing")
-        ankiK.sync()
+        ankiKDe.sync()
         bot.sendMessage(chatId, "Done!")
     }
 }

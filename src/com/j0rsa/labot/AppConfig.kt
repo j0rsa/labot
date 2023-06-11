@@ -29,7 +29,8 @@ data class AnkiConfig(
 data class SkyengConfig(
     val user: String,
     val password: String,
-    val studentId: String,
+    // alias -> id
+    val studentId: Map<String, Long>,
     val uploadAfter: String? = null
 )
 
