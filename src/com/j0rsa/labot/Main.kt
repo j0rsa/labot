@@ -29,17 +29,22 @@ object Main {
 
     private fun getState(userId: Long): State = stateMap[userId] ?: State.None
 
-    private val skyeng = Skyeng(
-        AppConfig.config.skyeng.user,
-        AppConfig.config.skyeng.password,
-    )
-    private var lastSkyengUpdate = AppConfig.config.skyeng.uploadAfter
-        ?: LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_LOCAL_DATE)
+    private val skyeng = AppConfig.config.skyeng.mapValues { (_, config) ->
+        Skyeng(
+            config.user,
+            config.password,
+            config.studentId,
+        )
+    }
+    private var lastSkyengUpdate = AppConfig.config.skyeng.mapValues { (_, config) ->
+        config.uploadAfter
+            ?: LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_LOCAL_DATE)
+    }.toMutableMap()
 
     private val ankiKDeConfig = AppConfig.config.anki["k_de"]!!
     private val ankiKDe = Anki(ankiKDeConfig.url)
 
-    private val ankis = AppConfig.config.skyeng.studentId.map { (k,_) ->
+    private val ankis = AppConfig.config.skyeng.map { (k,_) ->
         val config = AppConfig.config.anki[k]!!
         val instance = Anki(config.url)
         k to instance
@@ -58,10 +63,10 @@ object Main {
                             val date = LocalDate.parse(callbackQuery.data.split(":")[1])
                             val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
                             runBlocking {
-                                AppConfig.config.skyeng.studentId.map { (alias, id) ->
+                                skyeng.map { (alias, _) ->
                                     val chatId = ChatId.fromId(chatId)
                                     bot.sendMessage(chatId, "Processing: $alias")
-                                    skyengSyncPerform(bot, chatId, id.toString(), date, ankis[alias]!!)
+                                    skyengSyncPerform(bot, chatId, alias, date)
                                 }
                             }
                         }
@@ -85,7 +90,7 @@ object Main {
                         replyMarkup = InlineKeyboardMarkup.create(
                             listOf(
                                 InlineKeyboardButton.CallbackData(
-                                    lastSkyengUpdate,
+                                    lastSkyengUpdate.entries.first().value,
                                     "${State.SkyengSync}:$lastSkyengUpdate"
                                 )
                             )
@@ -114,10 +119,10 @@ object Main {
                             try {
                                 val updateAfter: LocalDate = LocalDate.parse(text)
                                 runBlocking {
-                                    AppConfig.config.skyeng.studentId.map { (alias, id) ->
+                                    skyeng.map { (alias, _) ->
                                         val chatId = ChatId.fromId(message.chat.id)
                                         bot.sendMessage(chatId, "Processing: $alias")
-                                        skyengSyncPerform(bot, chatId, id.toString(), updateAfter, ankis[alias]!!)
+                                        skyengSyncPerform(bot, chatId, alias, updateAfter)
                                     }
                                 }
                                 setState(userId, State.None)
@@ -128,7 +133,7 @@ object Main {
                                     replyMarkup = InlineKeyboardMarkup.create(
                                         listOf(
                                             InlineKeyboardButton.CallbackData(
-                                                lastSkyengUpdate,
+                                                lastSkyengUpdate.entries.first().value,
                                                 "${State.SkyengSync}:$lastSkyengUpdate"
                                             )
                                         )
@@ -159,8 +164,9 @@ object Main {
         }.startPolling()
     }
 
-    private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, studentId: String, updateAfter: LocalDate, anki: Anki) {
-        log.info("Syncing skyeng after $updateAfter")
+    private suspend fun skyengSyncPerform(bot: Bot, chatId: ChatId, alias: String, updateAfter: LocalDate) {
+        log.info("Syncing skyeng after ${lastSkyengUpdate[alias]}")
+        val skyeng = skyeng[alias]?: throw IllegalStateException("Skyeng with alias $alias not found")
         val token = skyeng.login()
         log.info("Logged in and received token")
         token.ifEmpty {
@@ -169,19 +175,20 @@ object Main {
             throw IllegalStateException("Unable to login! Please check the credentials!")
         }
         log.info("Fetching words...")
-        val words = skyeng.getWords(token, studentId).map { it.word }
+        val words = skyeng.getWords().map { it.word }
             .filter { it.createdAt.toLocalDate() > updateAfter }
         bot.sendMessage(chatId, "Fetched words: ${words.size}")
-        val meanings = skyeng.getMeaning(token, words)
+        val meanings = skyeng.getMeaning(words)
         bot.sendMessage(chatId, "Fetched meanings: ${meanings.size}")
         val notes = meanings.flatMap { it.toAnkiClozeNote("skyeng") }.filterNotNull()
         bot.sendMessage(chatId, "Detected notes: ${notes.size}")
         bot.sendMessage(chatId, "Uploading notes")
+        val anki = ankis[alias] ?: throw IllegalStateException("Unable to find anki with alias $alias")
         anki.addNotes(notes)
         bot.sendMessage(chatId, "Syncing")
         anki.sync()
         bot.sendMessage(chatId, "Done!")
-        lastSkyengUpdate = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+        lastSkyengUpdate[alias] = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
     }
 
     private suspend fun chatterbugExportPerform(bot: Bot, chatId: ChatId, unitId: Long) {

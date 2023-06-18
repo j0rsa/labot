@@ -34,9 +34,11 @@ import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
 import java.time.ZonedDateTime
 
+@OptIn(ExperimentalSerializationApi::class)
 class Skyeng(
     private val user: String,
     private val password: String,
+    private val studentId: Long,
 ) {
     private val log = loggerFor<Skyeng>()
 
@@ -113,7 +115,8 @@ class Skyeng(
         } ?: ""
     }
 
-    suspend fun getWordSets(token: String, studentId: String): List<WordSetData> {
+    suspend fun getWordSets(): List<WordSetData> {
+        val token = login()
         val pageSize = 100
         val firstPage = client.get("$apiHost/for-vimbox/v1/wordsets.json") {
             parameter("page", 1)
@@ -132,8 +135,9 @@ class Skyeng(
         }
     }
 
-    suspend fun getWords(token: String, studentId: String): List<WordOfSet> {
-        val wordSets = getWordSets(token, studentId)
+    suspend fun getWords(): List<WordOfSet> {
+        val wordSets = getWordSets()
+        val token = login()
         val pageSize = 100
         return wordSets.flatMap { set ->
             val path = "$apiHost/v1/wordsets/${set.id}/words.json"
@@ -163,7 +167,8 @@ class Skyeng(
         }
     }
 
-    suspend fun getMeaning(token: String, words: List<WordData>): List<Meaning> = words.chunked(25).flatMap { chunk ->
+    suspend fun getMeaning(words: List<WordData>): List<Meaning> = words.chunked(25).flatMap { chunk ->
+        val token = login()
         val ids = chunk.joinToString(",") { it.meaningId.toString() }
         client.get("$dictionaryHost/for-services/v2/meanings") {
             parameter("ids", ids)

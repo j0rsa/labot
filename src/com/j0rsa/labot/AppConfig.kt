@@ -10,7 +10,7 @@ object AppConfig {
 data class Config(
     val database: DatabaseConfig,
     val anki: Map<String, AnkiConfig>,
-    val skyeng: SkyengConfig,
+    val skyeng: Map<String, SkyengConfig>,
     val chatterbug: ChatterbugConfig,
     val telegram: TelegramConfig,
 )
@@ -30,7 +30,7 @@ data class SkyengConfig(
     val user: String,
     val password: String,
     // alias -> id
-    val studentId: Map<String, Long>,
+    val studentId: Long,
     val uploadAfter: String? = null
 )
 

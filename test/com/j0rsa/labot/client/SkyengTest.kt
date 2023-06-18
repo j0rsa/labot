@@ -9,15 +9,15 @@ import io.kotest.matchers.shouldNotBe
 import java.time.LocalDate
 
 class SkyengTest : StringSpec({
-    val skyengConf = AppConfig.config.skyeng
+    val skyengConf = AppConfig.config.skyeng["a"]!!
     val skyeng = Skyeng(
         skyengConf.user,
         skyengConf.password,
+        skyengConf.studentId,
     )
-    val studentId = skyengConf.studentId
 
     "csrf should not be empty" {
-        val csrf = Skyeng("", "").getCsrf()
+        val csrf = Skyeng("", "", 0L).getCsrf()
         println(csrf)
         csrf shouldNotBe ""
     }
@@ -27,19 +27,18 @@ class SkyengTest : StringSpec({
     }
 
     "!getWordSet" {
-        val result = skyeng.getWordSets(skyeng.login(), studentId.toString())
+        val result = skyeng.getWordSets()
         result.size shouldBeGreaterThanOrEqual 1
     }
 
     "!getWords" {
-        val result = skyeng.getWords(skyeng.login(), studentId.toString())
+        val result = skyeng.getWords()
         result.size shouldBeGreaterThanOrEqual 1
     }
 
     "!getMeanings" {
-        val token = skyeng.login()
-        val words = skyeng.getWords(token, studentId.toString()).map { it.word }
-        val meanings = skyeng.getMeaning(token, words)
+        val words = skyeng.getWords().map { it.word }
+        val meanings = skyeng.getMeaning(words)
         meanings.size shouldBe words.size
     }
 
@@ -151,11 +150,10 @@ class SkyengTest : StringSpec({
     }
 
     "!full sync test" {
-        val token = skyeng.login()
-        val words = skyeng.getWords(token, studentId.toString()).map { it.word }
+        val words = skyeng.getWords().map { it.word }
         println("Fetched words: ${words.size}")
         // on prod +1 step: to filter out old words
-        val meanings = skyeng.getMeaning(token, words)
+        val meanings = skyeng.getMeaning(words)
         println("Fetched meanings: ${meanings.size}")
         val notes = meanings.flatMap { it.toAnkiClozeNote("skyeng") }.filterNotNull()
         println("Detected notes: ${notes.size}")
@@ -169,14 +167,13 @@ class SkyengTest : StringSpec({
     }
 
     "!partial sync test" {
-        val token = skyeng.login()
         val updateAfter = skyengConf.uploadAfter?.let { LocalDate.parse(it) }
         updateAfter shouldNotBe null
-        val words = skyeng.getWords(token, studentId.toString()).map { it.word }
+        val words = skyeng.getWords().map { it.word }
             .filter { it.createdAt.toLocalDate() > updateAfter!! }
         println("Fetched words: ${words.size}")
         // on prod +1 step: to filter out old words
-        val meanings = skyeng.getMeaning(token, words)
+        val meanings = skyeng.getMeaning(words)
         println("Fetched meanings: ${meanings.size}")
         val notes = meanings.flatMap { it.toAnkiClozeNote("skyeng") }
             .filterNotNull()
