@@ -188,7 +188,7 @@ class Skyeng(
         data class WordSetData(
             val id: Int,
             val title: String,
-            val subtitle: String,
+            val subtitle: String? = null,
         )
 
         @Serializable
