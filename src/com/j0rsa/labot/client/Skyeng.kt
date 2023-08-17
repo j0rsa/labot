@@ -74,7 +74,7 @@ class Skyeng(
     }
 
     suspend fun login(): String {
-        log.info("Login")
+        log.info("Logging in: $user")
         authCookie?.let {
             log.info("auth cookie exists")
             if (!it.isExpired()) {
@@ -107,7 +107,7 @@ class Skyeng(
     }
 
     private suspend fun getJwt(): String {
-        log.info("Getting JWT")
+        log.info("Getting JWT for: $user")
         val response = client.post("$host/user-api/v1/auth/jwt")
         require(response.status == HttpStatusCode.OK) {
             "Invalid response from the Jwt endpoint: ${response.status}"
@@ -132,7 +132,7 @@ class Skyeng(
             bearerAuth(token)
         }
         require(get.status == HttpStatusCode.OK) {
-            "Invalid response from the server: ${get.status}"
+            "Invalid response code from the WordSets endpoint: ${get.status}"
         }
         val firstPage = get.body<WordSet>()
 
@@ -142,7 +142,15 @@ class Skyeng(
                 parameter("pageSize", pageSize)
                 parameter("studentId", studentId)
                 bearerAuth(token)
-            }.body<WordSet>().data
+            }.runCatching { body<WordSet>().data }.getOrElse {
+                val body = client.get("$apiHost/v1/wordsets.json") {
+                    parameter("page", it)
+                    parameter("pageSize", pageSize)
+                    parameter("studentId", studentId)
+                    bearerAuth(token)
+                }.bodyAsText()
+                throw IllegalStateException("Invalid response from the server:\n $body")
+            }
         }
     }
 
@@ -199,7 +207,7 @@ class Skyeng(
         data class WordSetData(
             val id: Int,
             val title: String,
-            val subtitle: String = "",
+            val subtitle: String? = null,
         )
 
         @Serializable

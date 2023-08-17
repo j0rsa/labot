@@ -6,6 +6,7 @@ import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.message
+import com.github.kotlintelegrambot.dispatcher.pollAnswer
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
@@ -64,9 +65,9 @@ object Main {
                             val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
                             runBlocking {
                                 skyeng.map { (alias, _) ->
-                                    val chatId = ChatId.fromId(chatId)
-                                    bot.sendMessage(chatId, "Processing: $alias")
-                                    skyengSyncPerform(bot, chatId, alias, date)
+                                    val fromChatId = ChatId.fromId(chatId)
+                                    bot.sendMessage(fromChatId, "Processing: $alias")
+                                    skyengSyncPerform(bot, fromChatId, alias, date)
                                 }
                             }
                         }
@@ -110,6 +111,24 @@ object Main {
                     exitProcess(0)
                 }
 
+                command("test") {
+                    if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@command
+                    bot.sendPoll(
+                        ChatId.fromId(message.chat.id),
+                        "What to export?",
+                        skyeng.keys.toList(),
+                        isAnonymous = false,
+                        allowsMultipleAnswers = false,
+                        )
+                }
+
+                pollAnswer {
+                    val answer = pollAnswer.optionIds
+                    log.info("received answer: $answer")
+                    update.message?.let { message ->
+                        bot.sendMessage(ChatId.fromId(message.chat.id), "I received: $answer")
+                    }
+                }
                 message(Filter.Text and Filter.Command.not()) {
                     if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@message
                     val userId = message.from?.id ?: return@message
