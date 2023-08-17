@@ -118,16 +118,16 @@ object Main {
                         "What to export?",
                         skyeng.keys.toList(),
                         isAnonymous = false,
-                        allowsMultipleAnswers = false,
+                        allowsMultipleAnswers = true,
                         )
                 }
 
                 pollAnswer {
                     val answer = pollAnswer.optionIds
-                    log.info("received answer: $answer")
-                    update.message?.let { message ->
-                        bot.sendMessage(ChatId.fromId(message.chat.id), "I received: $answer")
-                    }
+                    val chatId = ChatId.fromId(pollAnswer.user.id)
+                    val aliases = answer.map { skyeng.keys.toList()[it] }
+                    log.info("received answer: $aliases")
+                    bot.sendMessage(chatId, "I received: $aliases")
                 }
                 message(Filter.Text and Filter.Command.not()) {
                     if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@message

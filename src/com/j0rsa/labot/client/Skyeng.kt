@@ -25,7 +25,6 @@ import java.nio.charset.Charset
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -46,20 +45,20 @@ class Skyeng(
     private var client = httpClient()
 
     private fun httpClient() = HttpClient(CIO) {
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        prettyPrint = true
-                        encodeDefaults = true
-                        explicitNulls = false
-                        ignoreUnknownKeys = true
-                    }
-                )
-            }
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-            }
+        install(ContentNegotiation) {
+            json(
+                Json {
+                    prettyPrint = true
+                    encodeDefaults = true
+                    explicitNulls = false
+                    ignoreUnknownKeys = true
+                }
+            )
         }
+        install(HttpCookies) {
+            storage = AcceptAllCookiesStorage()
+        }
+    }
 
     private val host = "https://id.skyeng.ru"
     private val apiHost = "https://api.words.skyeng.ru/api"
@@ -137,13 +136,13 @@ class Skyeng(
         val firstPage = get.body<WordSet>()
 
         return firstPage.data + (2..firstPage.meta.lastPage).flatMap {
-            client.get("$apiHost/v1/wordsets.json") {
+            client.get("$apiHost/for-vimbox/v1/wordsets.json") {
                 parameter("page", it)
                 parameter("pageSize", pageSize)
                 parameter("studentId", studentId)
                 bearerAuth(token)
             }.runCatching { body<WordSet>().data }.getOrElse {
-                val body = client.get("$apiHost/v1/wordsets.json") {
+                val body = client.get("$apiHost/for-vimbox/v1/wordsets.json") {
                     parameter("page", it)
                     parameter("pageSize", pageSize)
                     parameter("studentId", studentId)
@@ -233,11 +232,10 @@ class Skyeng(
         @Serializable
         data class WordData(
             val meaningId: Int,
-            @Serializable(with = ZonedDateTimeSerializer::class) val createdAt: ZonedDateTime,
+            @Serializable(with = ZonedDateTimeSerializer::class)
+            val createdAt: ZonedDateTime,
         )
 
-        @OptIn(ExperimentalSerializationApi::class)
-        @Serializer(forClass = ZonedDateTime::class)
         object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
             override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ZonedDateTime", PrimitiveKind.STRING)
 
