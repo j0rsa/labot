@@ -16,6 +16,7 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
@@ -84,7 +85,7 @@ class Skyeng(
         log.info("Performing login")
         // reset client
         client = httpClient()
-        client.submitForm(
+        val response = client.submitForm(
             "$host/frame/login-submit",
             Parameters.build {
                 append("username", user)
@@ -97,6 +98,9 @@ class Skyeng(
                 append("Content-Type", "application/x-www-form-urlencoded")
             }
         }
+        require(response.status == HttpStatusCode.OK) {
+            "Invalid response from the login endpoint: ${response.status}"
+        }
         return getJwt().ifBlank {
             throw IllegalStateException("Unable to login! Please check your credentials!")
         }
@@ -105,6 +109,9 @@ class Skyeng(
     private suspend fun getJwt(): String {
         log.info("Getting JWT")
         val response = client.post("$host/user-api/v1/auth/jwt")
+        require(response.status == HttpStatusCode.OK) {
+            "Invalid response from the Jwt endpoint: ${response.status}"
+        }
         val setCookies = response.headers.getAll("Set-Cookie")
         log.info("Setting cookies returned: ${setCookies?.size}")
         return setCookies?.firstOrNull()?.let {
@@ -118,12 +125,16 @@ class Skyeng(
     suspend fun getWordSets(): List<WordSetData> {
         val token = login()
         val pageSize = 100
-        val firstPage = client.get("$apiHost/for-vimbox/v1/wordsets.json") {
+        val get = client.get("$apiHost/for-vimbox/v1/wordsets.json") {
             parameter("page", 1)
             parameter("pageSize", pageSize)
             parameter("studentId", studentId)
             bearerAuth(token)
-        }.body<WordSet>()
+        }
+        require(get.status == HttpStatusCode.OK) {
+            "Invalid response from the server: ${get.status}"
+        }
+        val firstPage = get.body<WordSet>()
 
         return firstPage.data + (2..firstPage.meta.lastPage).flatMap {
             client.get("$apiHost/v1/wordsets.json") {
@@ -188,7 +199,7 @@ class Skyeng(
         data class WordSetData(
             val id: Int,
             val title: String,
-            val subtitle: String? = null,
+            val subtitle: String = "",
         )
 
         @Serializable
