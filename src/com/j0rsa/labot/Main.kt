@@ -28,7 +28,7 @@ object Main {
         stateMap[userId] = state
     }
 
-    private fun getState(userId: Long): State = stateMap[userId] ?: State.None
+    private fun getState(userId: Long): State = stateMap[userId] ?: None
 
     private val skyeng = AppConfig.config.skyeng.mapValues { (_, config) ->
         Skyeng(
@@ -60,7 +60,7 @@ object Main {
                 callbackQuery {
                     if (callbackQuery.from.id !in AppConfig.config.telegram.allowedUsers) return@callbackQuery
                     when (callbackQuery.data.split(":").firstOrNull()) {
-                        State.SkyengSync.name -> {
+                        SkyengSync.name -> {
                             val date = LocalDate.parse(callbackQuery.data.split(":")[1])
                             val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
                             runBlocking {
@@ -84,24 +84,19 @@ object Main {
                 command("skyeng_sync") {
                     if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@command
                     val userId = message.from?.id ?: return@command
-                    setState(userId, State.SkyengSync)
-                    bot.sendMessage(
+                    bot.sendPoll(
                         ChatId.fromId(message.chat.id),
-                        text = "Enter a date in format yyyy-mm-dd or tab the button below to use the last known",
-                        replyMarkup = InlineKeyboardMarkup.create(
-                            listOf(
-                                InlineKeyboardButton.CallbackData(
-                                    lastSkyengUpdate.entries.first().value,
-                                    "${State.SkyengSync}:$lastSkyengUpdate"
-                                )
-                            )
-                        )
+                        "For whom do we run an export?",
+                        skyeng.keys.toList(),
+                        isAnonymous = false,
+                        allowsMultipleAnswers = true,
                     )
+                    setState(userId, SkyengSync)
                 }
                 command("chatterbug_export") {
                     if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@command
                     val userId = message.from?.id ?: return@command
-                    setState(userId, State.ChatterbugExport)
+                    setState(userId, ChatterbugExport)
                     bot.sendMessage(ChatId.fromId(message.chat.id), "Which unit id do you want to export?")
                 }
 
@@ -111,40 +106,62 @@ object Main {
                     exitProcess(0)
                 }
 
-                command("test") {
+                command("last_exports") {
                     if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@command
-                    bot.sendPoll(
-                        ChatId.fromId(message.chat.id),
-                        "What to export?",
-                        skyeng.keys.toList(),
-                        isAnonymous = false,
-                        allowsMultipleAnswers = true,
-                        )
+                    val updates = lastSkyengUpdate.map { (k,v) ->
+                        "$k: $v"
+                    }.joinToString("\n")
+                    bot.sendMessage(ChatId.fromId(message.chat.id), "Last updates:\n$updates")
                 }
 
                 pollAnswer {
-                    val answer = pollAnswer.optionIds
-                    val chatId = ChatId.fromId(pollAnswer.user.id)
-                    val aliases = answer.map { skyeng.keys.toList()[it] }
-                    log.info("received answer: $aliases")
-                    bot.sendMessage(chatId, "I received: $aliases")
+                    val userId = pollAnswer.user.id
+                    when (getState(userId)) {
+                        SkyengSync -> {
+                            val answer = pollAnswer.optionIds
+                            val chatId = ChatId.fromId(userId)
+                            val aliases = answer.map { skyeng.keys.toList()[it] }
+                            val lastUpdated = aliases.mapNotNull {
+                                lastSkyengUpdate[it]
+                            }.toSet()
+                            if (lastUpdated.size > 1) {
+                                bot.sendMessage(chatId, "You are about to update the last updated timestamp for all users $aliases")
+                                val lastUserUpdates = aliases.joinToString("\n") {
+                                    "$it: ${lastSkyengUpdate[it]}"
+                                }
+                                bot.sendMessage(chatId, "Last updates:\n$lastUserUpdates")
+                            }
+
+                            bot.sendMessage(
+                                chatId,
+                                text = "Enter a date in format yyyy-mm-dd or tab the button below to use the last known",
+                                replyMarkup = InlineKeyboardMarkup.create(
+                                    lastUpdated.map {
+                                        InlineKeyboardButton.CallbackData(it, "${SkyengSync.name}:$it")
+                                    }
+                                )
+                            )
+                            setState(userId, SkyengSyncWho(aliases))
+                        }
+                        else -> {}
+                    }
                 }
                 message(Filter.Text and Filter.Command.not()) {
                     if (message.from?.id !in AppConfig.config.telegram.allowedUsers) return@message
                     val userId = message.from?.id ?: return@message
                     val text = message.text ?: return@message
-                    when (getState(userId)) {
-                        State.SkyengSync -> {
+                    when (val state = getState(userId)) {
+                        is SkyengSyncWho -> {
                             try {
                                 val updateAfter: LocalDate = LocalDate.parse(text)
                                 runBlocking {
-                                    skyeng.map { (alias, _) ->
+                                    state.aliases.map { alias ->
                                         val chatId = ChatId.fromId(message.chat.id)
                                         bot.sendMessage(chatId, "Processing: $alias")
                                         skyengSyncPerform(bot, chatId, alias, updateAfter)
                                     }
                                 }
-                                setState(userId, State.None)
+                                setState(userId, None)
                             } catch (e: DateTimeParseException) {
                                 bot.sendMessage(
                                     ChatId.fromId(message.chat.id),
@@ -153,7 +170,7 @@ object Main {
                                         listOf(
                                             InlineKeyboardButton.CallbackData(
                                                 lastSkyengUpdate.entries.first().value,
-                                                "${State.SkyengSync}:$lastSkyengUpdate"
+                                                "${SkyengSync.name}:$lastSkyengUpdate"
                                             )
                                         )
                                     )
@@ -167,12 +184,12 @@ object Main {
                             }
                         }
 
-                        State.ChatterbugExport -> {
+                        is ChatterbugExport -> {
                             text.toLongOrNull()?.let { id ->
                                 runBlocking {
                                     chatterbugExportPerform(bot, ChatId.fromId(message.chat.id), id)
                                 }
-                                setState(userId, State.None)
+                                setState(userId, None)
                             } ?: bot.sendMessage(ChatId.fromId(message.chat.id), "Which unit id do you want to export?")
                         }
 
@@ -226,8 +243,11 @@ object Main {
     }
 }
 
-enum class State {
-    SkyengSync,
-    ChatterbugExport,
-    None
+sealed class State
+object SkyengSync: State() {
+    const val name = "SkyengSync"
 }
+class SkyengSyncWho(val aliases: List<String>): State()
+object ChatterbugExport: State()
+object None: State()
+
