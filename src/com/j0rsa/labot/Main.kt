@@ -216,7 +216,7 @@ object Main {
         bot.sendMessage(chatId, "Fetched words: ${words.size}")
         val meanings = skyeng.getMeaning(words)
         bot.sendMessage(chatId, "Fetched meanings: ${meanings.size}")
-        val notes = meanings.flatMap { it.toAnkiClozeNote("skyeng") }.filterNotNull()
+        val notes = meanings.flatMap { it.toAnkiClozeNote(AppConfig.config.anki[alias]!!.deck) }.filterNotNull()
         bot.sendMessage(chatId, "Detected notes: ${notes.size}")
         bot.sendMessage(chatId, "Uploading notes")
         val anki = ankis[alias] ?: throw IllegalStateException("Unable to find anki with alias $alias")

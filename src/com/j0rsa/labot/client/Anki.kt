@@ -26,7 +26,7 @@ import kotlinx.serialization.json.Json
 class Anki(
     private val url: String
 ) {
-    val log = loggerFor<Anki>()
+    private val log = loggerFor<Anki>()
 
     @OptIn(ExperimentalSerializationApi::class)
     private val client = HttpClient(CIO) {
