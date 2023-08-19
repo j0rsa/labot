@@ -6,12 +6,12 @@ import java.util.UUID
 
 class AnkiTest : StringSpec({
     val anki = Anki("http://10.43.149.198")
-    "sync" {
+    "!sync" {
         val sync = anki.sync()
         sync.error shouldBe null
     }
 
-    "add card" {
+    "!add card" {
         val notes = (0 until 100).map {
             note()
         }
