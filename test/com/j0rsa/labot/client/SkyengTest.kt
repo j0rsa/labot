@@ -143,7 +143,7 @@ class SkyengTest : StringSpec({
             |His success has made some of his old friends {{c1::jealous}}.<br/>
             |- <b>завистливый</b><br/>
             |{{c1::[sound:en_male_2_jealous.mp3]}}<br/>
-            |Его успех заставил некоторых из его старых друзей завидовать.<br/>
+            |Его успех вызвал зависть у некоторых его старых друзей.<br/>
             |{{c1::[sound:en_male_2_His_success_has_made_some_of_his_old_friends_jealous.mp3]}}<br/>
             |{{c1::<img src='7188466db2df0e76cc7291b55fb839d0.jpeg'/>}}
             """.trimMargin()
