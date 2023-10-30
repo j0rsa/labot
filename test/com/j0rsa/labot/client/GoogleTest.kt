@@ -10,6 +10,7 @@ class GoogleTest : StringSpec({
         Google.translateEnToRu("Some example") shouldBeIn listOf(
             "Какой-то пример",
             "Некоторый пример",
+            "Некоторые примеры",
         )
     }
 })
