@@ -38,6 +38,7 @@ class Anki(
             delayMillis { retry ->
                 retry * 3000L
             }
+            retryOnException(maxRetries, true)
         }
         install(ContentNegotiation) {
             val json = Json {
@@ -65,6 +66,7 @@ class Anki(
     suspend fun addNote(note: Note) = sendAction("addNote", note)
 
     suspend fun addNotes(notes: Collection<Note>) = run {
+        // TODO: validate that the deck exists as it won't trigger an error
         log.info("adding notes")
         val chunks = notes.chunked(10)
         val size = chunks.size
