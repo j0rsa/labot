@@ -2,6 +2,7 @@ package com.j0rsa.labot.client
 
 import com.j0rsa.labot.AppConfig
 import com.j0rsa.labot.client.Skyeng.Companion.Voice
+import com.j0rsa.labot.client.support.Translator
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
@@ -106,6 +107,10 @@ class SkyengTest : StringSpec({
     }
 
     "to anki cloze note" {
+        val translator = object :Translator{
+            override suspend fun translateEnToRu(text: String): String =
+                "Его успех вызвал зависть у некоторых его старых друзей."
+        }
         val notes = Skyeng.Companion.Meaning(
             alternatives = listOf(),
             definition = Skyeng.Companion.MeaningDefinition(
@@ -136,7 +141,7 @@ class SkyengTest : StringSpec({
             text = "jealous",
             transcription = "ˈʤɛləs",
             translation = Skyeng.Companion.Translation(text = "завистливый")
-        ).toAnkiClozeNote("test").filterNotNull()
+        ).toAnkiClozeNote("test", translator = translator).filterNotNull()
         notes.size shouldBe 2
         val first = notes.first()
         first.fields.text shouldBe """

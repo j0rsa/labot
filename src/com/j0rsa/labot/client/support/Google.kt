@@ -6,10 +6,14 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
 
-object Google {
+interface Translator {
+    suspend fun translateEnToRu(text: String): String
+}
+
+object Google : Translator {
     private val client = HttpClient(CIO)
 
-    suspend fun translateEnToRu(text: String) =
+    override suspend fun translateEnToRu(text: String) =
         client.get("https://translate.googleapis.com/translate_a/single") {
             parameter("client", "gtx")
             parameter("sl", "en")

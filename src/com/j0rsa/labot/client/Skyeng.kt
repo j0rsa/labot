@@ -1,6 +1,7 @@
 package com.j0rsa.labot.client
 
 import com.j0rsa.labot.client.support.Google
+import com.j0rsa.labot.client.support.Translator
 import com.j0rsa.labot.ktor.SetCookie
 import com.j0rsa.labot.loggerFor
 import io.ktor.client.HttpClient
@@ -266,7 +267,11 @@ class Skyeng(
                 )
             }
 
-            suspend fun toAnkiClozeNote(deckName: String, voice: Voice = Voice.Male2) = examples.map {
+            suspend fun toAnkiClozeNote(
+                deckName: String,
+                voice: Voice = Voice.Male2,
+                translator: Translator = Google
+            ) = examples.map {
                 val cWrappedExample = (it.text ?: return@map null).replace("[", "{{c1::").replace("]", "}}")
                 val clearExample = it.text.replace("[", "").replace("]", "")
                 val wordSoundAttachment = customSoundAttachment(voice) ?: return@map null
@@ -276,7 +281,7 @@ class Skyeng(
                     |$cWrappedExample<br/>
                     |- <b>${translation.text}</b><br/>
                     |{{c1::[sound:${wordSoundAttachment.filename}]}}<br/>
-                    |${Google.translateEnToRu(clearExample)}<br/>
+                    |${translator.translateEnToRu(clearExample)}<br/>
                     |{{c1::[sound:${sentenceSoundAttachment.filename}]}}<br/>
                     |{{c1::<img src='${pictureAttachment.filename}'/>}}
                 """.trimMargin()
